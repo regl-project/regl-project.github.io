@@ -1,0 +1,14 @@
+{
+  "name": "regl-site",
+  "version": "0.0.0",
+  "description": "website for regl",
+  "main": "index.js",
+  "scripts": {
+    "bundle": "browserify index.js -o bundle.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dom-css": "^2.0.0"
+  }
+}
