@@ -1,11 +1,15 @@
-var css = require('dom-css')
+const choo = require('choo')
 
-var test = document.body.appendChild(document.createElement('div'))
-test.innerHTML = 'hello world'
+const app = choo()
 
-css(test, {fontSize: '72px'})
+app.router(function (route) {
+  return [
+    route('/', require('./views/main')),
+    route('/api', require('./views/api')),
+    route('/comparisons', require('./views/comparisons')),
+    route('/examples', require('./views/examples'))
+  ]}
+)
 
-setInterval(function () {
-  console.log('rgb(0, 0, ' + Math.round(Math.random() * 255) + ')')
-  css(test, {color: 'rgb(0, 0, ' + Math.round(Math.random() * 255) + ')'})
-}, 500)
+const tree = app.start()
+document.body.appendChild(tree)

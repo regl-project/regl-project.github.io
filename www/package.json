@@ -4,11 +4,13 @@
   "description": "website for regl",
   "main": "index.js",
   "scripts": {
-    "bundle": "browserify index.js -o bundle.js"
+    "bundle": "browserify index.js -o bundle.js",
+    "start": "budo index.js:bundle.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "choo": "^1.1.0",
     "dom-css": "^2.0.0"
   }
 }
