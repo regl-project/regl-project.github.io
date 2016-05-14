@@ -46,7 +46,8 @@
     "build-script": "browserify regl.js --standalone reglInit > dist/regl.js",
     "build-min": "node bin/build-min.js",
     "build-bench": "browserify bench/index.js | indexhtmlify > www/bench.html",
-    "build-gallery": "node bin/build-gallery.js"
+    "build-gallery": "node bin/build-gallery.js",
+    "build-site": "cd www && npm run bundle"
   },
   "repository": {
     "type": "git",
