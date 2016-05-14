@@ -1081,21 +1081,18 @@ const choo = require('choo')
 
 const app = choo()
 
-var main = require('./views/main')
-var api = require('./views/api')
-
 app.router(function (route) {
-  console.log(route)
   return [
     route('/', require('./views/main')),
-    route('/api', require('./views/api'))
-    ]
-  }
+    route('/api', require('./views/api')),
+    route('/comparisons', require('./views/comparisons')),
+    route('/examples', require('./views/examples'))
+  ]}
 )
 
 const tree = app.start()
 document.body.appendChild(tree)
-},{"./views/api":27,"./views/main":28,"choo":9}],8:[function(require,module,exports){
+},{"./views/api":27,"./views/comparisons":28,"./views/examples":29,"./views/main":30,"choo":9}],8:[function(require,module,exports){
 var document = require('global/document')
 var hyperx = require('hyperx')
 
@@ -2694,10 +2691,40 @@ module.exports = function (params, state, send) {
 var choo = require('choo')
 
 module.exports = function (params, state, send) {
-  console.log(params)
   return choo.view`
   <main>
-    <h1>main</h1>
+    <h1>comparisons</h1>
+  </main>`
+}
+},{"choo":9}],29:[function(require,module,exports){
+var choo = require('choo')
+
+module.exports = function (params, state, send) {
+  var name = state.location.split('?')[1]
+  if (name) {
+    return choo.view`
+    <main>
+      <h1>${name}</h1>
+    </main>`
+  } else {
+    return choo.view`
+    <main>
+      <a href='/examples/?bunny'>bunny</a>
+      <a href='/examples/?camera'>camera</a>
+    </main>`
+  }
+}
+},{"choo":9}],30:[function(require,module,exports){
+var choo = require('choo')
+
+module.exports = function (params, state, send) {
+  return choo.view`
+  <main>
+    <h1>regl</h1>
+    <h2># functional and declarative webgl</h2>
+    <a href='/api'>api</a>
+    <a href='/comparisons'>comparisons</a>
+    <a href='/examples'>examples</a>
   </main>`
 }
 },{"choo":9}]},{},[7]);
