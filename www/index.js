@@ -1,6 +1,16 @@
-const choo = require('choo')
+var choo = require('choo')
 
-const app = choo()
+var app = choo()
+
+app.model({
+  namespace: 'example',
+  state: { selection: 'basic' },
+  reducers: {
+    update: function (action, state) {
+      return { selection: action.payload }
+    }
+  }
+})
 
 app.router(function (route) {
   return [
@@ -11,5 +21,5 @@ app.router(function (route) {
   ]}
 )
 
-const tree = app.start()
+var tree = app.start()
 document.body.appendChild(tree)
