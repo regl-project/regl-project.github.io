@@ -7,9 +7,13 @@
     "bundle": "browserify index.js -o bundle.js",
     "start": "budo index.js:bundle.js"
   },
+"browserify": {
+  "transform": "brfs"
+},
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "brfs": "^1.4.3",
     "choo": "^1.1.0",
     "dom-css": "^2.0.0"
   }
