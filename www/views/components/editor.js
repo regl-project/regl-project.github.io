@@ -4,7 +4,6 @@ var path = require('path')
 var css = require('dom-css')
 var insertcss = require('insert-css')
 var codemirror = require('codemirror')
-var fetch = require('github-fetch-file')
 var request = require('browser-request')
 var throttle = require('lodash.throttle')
 var debounce = require('lodash.debounce')
@@ -13,8 +12,8 @@ var sandbox = require('browser-module-sandbox')
 
 module.exports = function (name) {
 
-  var basecss = fs.readFileSync(path.join(__dirname, '..', 'lib', 'codemirror.css'))
-  var themecss = fs.readFileSync(path.join(__dirname, '..', 'lib', 'base16-dark.css'))
+  var basecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'codemirror.css'))
+  var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'base16-dark.css'))
   insertcss(basecss)
   insertcss(themecss)
 
@@ -24,12 +23,12 @@ module.exports = function (name) {
   var iframe = document.createElement('iframe')
 
   css(container, {
-    width: '550px', 
+    width: '600px', 
     height: window.innerHeight, 
     position: 'fixed',
     top: '0',
-    left: '230px',
-    fontSize: '110%',
+    right: '230px',
+    fontSize: '90%',
     opacity: 0.9,
     display: 'inline-block'
   })
@@ -66,6 +65,11 @@ module.exports = function (name) {
     console.log(data)
   })
 
+  bundler.on('bundleEnd', function (data) {
+    css(loading, {opacity: 0})
+    css(demo, {display: 'inherit'})
+  })
+
   function run () {
     bundler.bundle(editor.getValue(), {'regl': '0.5.0'})
   }
@@ -83,6 +87,8 @@ module.exports = function (name) {
       body = body.replace('../regl', 'regl')
       editor.setValue(body)
     })
+    css(loading, {opacity: 0.7})
+    css(demo, {display: 'none'})
   }
 
   var sidebar = document.createElement('div')
@@ -93,12 +99,12 @@ module.exports = function (name) {
     height: window.innerHeight, 
     position: 'fixed',
     top: '0',
-    left: '0',
+    right: '0',
     fontSize: '130%',
     opacity: 0.9,
     display: 'inline-block',
     backgroundColor: '#151515',
-    fontFamily: 'Hack',
+    fontFamily: 'klartext_monolight',
     padding: '10px',
     color: 'rgb(210,210,210)'
   })
@@ -113,7 +119,8 @@ module.exports = function (name) {
   css(heading, {
     paddingLeft: '10px',
     marginTop: '10px',
-    marginBottom: '20px'
+    marginBottom: '20px',
+    fontSize: '130%'
   })
   sidebar.appendChild(heading)
 
@@ -127,36 +134,58 @@ module.exports = function (name) {
       paddingLeft: '10px',
       marginBottom: '10px',
       cursor: 'pointer',
-      fontSize: '75%'
+      fontSize: '90%'
     })
     sidebar.appendChild(item)
   })
 
+  var loading = document.createElement('div')
+  loading.className = 'loading'
+  loading.innerHTML = 'loading...'
+  css(loading, {
+    fontFamily: 'klartext_monolight',
+    fontSize: '130%',
+    position: 'absolute',
+    left: '20px',
+    top: '20px',
+    backgroundColor: 'rgb(40,40,40)',
+    padding: '10px',
+    opacity: 0
+  })
+
   var button = document.createElement('div')
-  button.innerHTML = '<'
   css(button, {
     position: 'fixed',
-    left: '10px',
+    right: '10px',
     bottom: '10px',
-    width: '40px',
+    width: '50px',
     height: '50px',
-    backgroundColor: 'rgb(10,10,10)',
-    opacity: 0.9,
+    backgroundColor: 'rgb(40,40,40)',
+    opacity: 0.7,
     color: 'white',
-    fontSize: '250%',
-    paddingLeft: '10px',
+    fontSize: '400%',
     cursor: 'pointer'
   })
+
+  var logo = document.createElement('span')
+  logo.className = 'logo'
+  logo.innerHTML = '<'
+  css(logo, {
+    position: 'fixed',
+    right: '19px',
+    bottom: '0px'
+  })
+  button.appendChild(logo)
 
   button.onclick = function () {
     if (sidebar.style.display == 'none') {
       css(sidebar, {display: 'inherit'})
       css(container, {display: 'inherit', pointerEvents: 'all'})
-      css(button, {transform: 'rotate(0deg)'})
+      css(logo, {transform: 'rotate(0deg)', right: '19px'})
     } else {
       css(sidebar, {display: 'none'})
       css(container, {display: 'none', pointerEvents: 'none'})
-      css(button, {transform: 'rotate(90deg)'})
+      css(logo, {transform: 'rotate(90deg)', right: '15px'})
     }
   }
 
@@ -166,6 +195,7 @@ module.exports = function (name) {
   <div>
     ${sidebar}
     ${button}
+    ${loading}
     ${container}
     ${demo}
   </div>`
