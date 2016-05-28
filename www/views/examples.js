@@ -1,14 +1,17 @@
 var choo = require('choo')
-var editor = require('./components/editor')
-var sidebar = require('./components/sidebar')
-var back = require('./components/back')
+var Editor = require('./components/editor')
+var Back = require('./components/back')
 
 module.exports = function (params, state, send) {
-  var name = state.app.location.split('?')[1]
-  name = name || 'basic'
+  var selection = state.app.location.split('?')[1]
+  selection = selection || 'basic'
+
+  var back = Back()
+  var editor = Editor(state.examples.list, selection)
+
   return choo.view`
-  <main class='tmp'>
-    ${editor(name)}
+  <main>
+    ${editor}
     ${back}
   </main>`
 }

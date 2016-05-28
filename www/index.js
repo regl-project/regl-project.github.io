@@ -1,18 +1,13 @@
 var choo = require('choo')
-var fs = require('fs')
-var path = require('path')
-var insertcss = require('insert-css')
-var basecss = fs.readFileSync(path.join(__dirname,'style.css'))
 
 var app = choo()
 
 app.model({
-  namespace: 'example',
-  state: { selection: 'basic' },
-  reducers: {
-    update: function (action, state) {
-      return { selection: action.payload }
-    }
+  namespace: 'examples',
+  state: { list: [
+    'basic', 'batch', 'bunny', 'camera', 'dds', 'dynamic', 
+    'elements', 'envmap', 'feedback', 'geomorph'
+    ] 
   }
 })
 
@@ -28,4 +23,8 @@ app.router(function (route) {
 var tree = app.start()
 document.body.appendChild(tree)
 
+var fs = require('fs')
+var path = require('path')
+var insertcss = require('insert-css')
+var basecss = fs.readFileSync(path.join(__dirname,'style.css'))
 insertcss(basecss)
