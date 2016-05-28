@@ -43,47 +43,42 @@ a {
 	text-decoration: none;
 }
 
-a:hover {
-  color: #404040;
-  text-decoration: none;
-  transition: all .25s; 
-  -moz-transition: all .25s; 
-  -webkit-transition: all .25s;
-}
-
-#title{
+#title {
   margin-top: 50px;
 	margin-left:0px;
 }
 
-.myclass{
-	background-color: #909090;
+.hero {
+	background-color: rgb(40,40,40);
 	max-width:400px;
 	height: 172px;
 	text-align: center;
 	margin-right: 10px;
 	display:inline-block;
 	vertical-align: center;
+  color: white;
+  opacity: 0.8;
 }
 
-.myclass h1 {
-	font-size: 124px;
+.hero h1 {
+	font-size: 760%;
 	padding-right: 50px;
 	padding-left: 100px;
 	
 }
 
 .about {
-	background-color: #909090;
+	background-color: rgb(40,40,40);
 	width: 70%;
 	margin-left:0px;
 	text-align: center;
 	padding:30px;
 	margin-bottom:20px;
+  opacity: 0.8;
 }
 
 .link {
-	background-color: #909090;
+	background-color: rgb(40,40,40);
 	color: #fff;
 	padding-top: 10px;
 	padding-bottom: 10px;
@@ -93,6 +88,15 @@ a:hover {
 	text-align: center;
 	display:inline-block;
 	margin-right: 5px;	
+  opacity: 0.8;
+}
+
+.link:hover {
+  opacity: 0.9;
+}
+
+.callout {
+  display: inline-block;
 }
 
 .about h3 {
@@ -144,8 +148,8 @@ a:hover {
 
 .row {
   max-width: 1060px;
-  margin-right:0px;
-  margin-left:0px
+  margin-right: 0px;
+  margin-left: 0px;
 }
 
 .logo {
@@ -192,24 +196,10 @@ a:hover {
   background-color: black;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
 	h1 {
     font-size: 100px;
     margin: 0px;
-  }
-
-  a {
-    color: #fff;
-    text-decoration: none;
-    padding: 5px;
-  }
-
-  a:hover {
-    color: #404040;
-    text-decoration: none;
-    transition: all .25s; 
-    -moz-transition: all .25s; 
-    -webkit-transition: all .25s;
   }
 
   #title {
@@ -217,56 +207,26 @@ a:hover {
 	  margin-left:0px;
   }
 
-  .myclass {
-    background-color: #909090;
+  .hero {
 	  max-width:400px;
 	  height: 100px;
 	  text-align: center;
 	  margin-right: 10px;
 	  display:inline-block;
-	  vertical-align: center;
   }
 
-  .myclass h1{
-    font-size: 50px;
+  .hero h1{
+    font-size: 425%;
     padding-right: 20px;
 	  padding-left: 20px;
 	}
 
   .about {
-	  background-color: #909090;
 	  width: 70%;
-	  margin-left:0px;
-	  text-align: center;
-	  padding:20px;
-	  margin-bottom:20px;
 	}
 
   .link {
-	  background-color: #909090;
-	  color: #fff;
-	  padding-top: 10px;
-	  padding-bottom: 10px;
-	  padding-left: 20px;
-	  padding-right: 20px;
 	  font-size: 14px;
-	  text-align: center;
-	  display:inline-block;
-	  margin-right: 5px;
-	}
-
-  .secondlink {
-	  background-color: #909090;
-	  color: #fff;
-	  padding-top: 10px;
-	  padding-bottom: 10px;
-	  padding-left: 20px;
-	  padding-right: 20px;
-	  font-size: 14px;
-	  text-align: center;
-	  display:inline-block;
-	  margin-left: 20px;
-	  margin-right: 5px;
 	}
 
   .about h3 {
@@ -283,39 +243,12 @@ a:hover {
 	  padding-bottom: 10px;
   }
 
-  .colorblockblue {
-    background-color: #93E3F5;
-	  width: 20px;
+  .color-block-big {
 	  height: 100px;
-	  display:inline-block;
-	  position:absolute;
   }
 
-  .colorblockorange{
-    background-color: #FFD17D;
-	  width: 10px;
+  .color-block-small{
 	  height: 37px;
-	  display:inline-block;
-	  position:absolute;
-	  padding: 0px;
-  }
-
-  .colorblockpink{
-    background-color: #ECA2EC;
-	  width: 10px;
-	  height: 37px;
-	  display:inline-block;
-	  position:absolute;
-	  padding: 0px;
-  }
-
-  .colorblockgreen{
-    background-color: #A0E185;
-	  width: 10px;
-	  height: 37px;
-	  display:inline-block;
-	  position:absolute;
-	  padding: 0px;
   }
 
   .row {
@@ -323,115 +256,9 @@ a:hover {
     margin-right:0px;
     margin-left:0px
   }
-}
 
-@media (max-width: 768px){
-
-  .myclass{
-	  background-color: #909090;
-	  max-width:400px;
-	  height: 100px;
-	  text-align: center;
-	  margin-right: 10px;
-	  display:inline-block;
-	  vertical-align: center;
-  }
-
-  .myclass h1{
-	  font-size: 78px;
-	  padding-right: 20px;
-	  padding-left: 20px;
-	}
-
-  .about {
-	  background-color: #909090;
-	  width: 70%;
-	  margin-left:0px;
-	  text-align: center;
-	  padding:20px;
-	  margin-bottom:20px;
-	}
-
-  .link{
-	  background-color: #909090;
-	  color: #fff;
-	  padding-top: 10px;
-	  padding-bottom: 10px;
-	  padding-left: 20px;
-	  padding-right: 20px;
-	  font-size: 14px;
-	  text-align: center;
-	  display:inline-block;
-	  margin-right: 5px;
-	}
-
-  .secondlink {
-	  background-color: #909090;
-	  color: #fff;
-	  padding-top: 10px;
-	  padding-bottom: 10px;
-	  padding-left: 20px;
-	  padding-right: 20px;
-	  font-size: 14px;
-	  text-align: center;
-	  display:inline-block;
-	  margin-left: 20px;
-	  margin-right: 5px;
-	}
-
-  .about h3 {
-	  text-align: left;
-	  font-size:14px;
-	  margin:0px;
-	}
-
-  .hashtag h2 {
-	  text-align: left;
-	  font-size:16px;
-	  padding-left: 20px;
-	  padding-top: 10px;
-	  padding-bottom: 10px;
-  }
-
-
-  .colorblockblue {
-    background-color: #93E3F5;
-	  width: 20px;
-	  height: 100px;
-	  display:inline-block;
-	  position:absolute;
-  }
-
-  .colorblockorange {
-    background-color: #FFD17D;
-	  width: 10px;
-	  height: 37px;
-	  display:inline-block;
-	  position:absolute;
-	  padding: 0px;
-  }
-
-  .colorblockpink {
-    background-color: #ECA2EC;
-	  width: 10px;
-	  height: 37px;
-	  display:inline-block;
-	  position:absolute;
-	  padding: 0px;
-  }
-
-  .colorblockgreen {
-    background-color: #A0E185;
-	  width: 10px;
-	  height: 37px;
-	  display:inline-block;
-	  position:absolute;
-	  padding: 0px;
-  }
-
-  .row {
-    max-width: 1060px;
-    margin-right:0px;
-    margin-left:0px
+  .callout {
+    display: block;
+    margin-bottom: 10px;
   }
 }

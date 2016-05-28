@@ -10,7 +10,7 @@ module.exports = function (params, state, send) {
   <main>
     ${splash}
     <div class='row' id='title'>
-      <div class='myclass'>
+      <div class='hero'>
         <h1 align='right'>regl</h1>
       </div>
       <div class='color-block-big blue'>
@@ -23,7 +23,7 @@ module.exports = function (params, state, send) {
     </div>
     <div class ='row'>
       <div class ="about"> 
-      <h3>regl is a new functional abstraction for webgl.</h3>
+      <h3>regl is a new functional abstraction for WEBGL.</h3>
       <br>
       <h3>using regl is easier than writing raw webgl code because you don't need to manage state or binding. it's also lighter and faster and has less overhead than many existing 3d frameworks. and it has a functional data-driven style inspired by react.</h3>
       <br>
@@ -32,14 +32,22 @@ module.exports = function (params, state, send) {
     </div>
     <br>
     <div class='row'>
-      <a class='link' href='/examples'>examples</a>
-      <span class ='color-block-small orange'></span>
-      <a class='link' href='/comparisons'>comparisons</a>
-      <span class ='color-block-small pink'></span>
-      <a class='link' href='/api'>api</a>
-      <span class ='color-block-small green'></span>
+      <div class='callout'>
+        <a class='link' href='/examples'>examples</a>
+        <span class ='color-block-small orange'></span>
+      </div>
+      <div class='callout'>
+        <a class='link' href='/comparisons'>comparisons</a>
+        <span class ='color-block-small pink'></span>
+      </div>
+      <div class='callout'>
+        <a class='link' href='/api'>api</a>
+        <span class ='color-block-small green'></span>
+      </div>
+      <div class='callout'>
       <a class='link' href='https://github.com/mikolalysenko/regl'>github</a>
       <span class ='color-block-small green'></span>
+      </div>
     </div>
   </main>`
 }
