@@ -18,7 +18,7 @@ module.exports = function (params, state, send) {
     </div>
     <div class ='row'>
       <div class ="about"> 
-      <h3>regl is a new set of functional abstracitons for webgl.</h3>
+      <h3>regl is a new functional abstraction for webgl.</h3>
       <br>
       <h3>using regl is easier than writing raw webgl code because you don't need to manage state or binding. it's also lighter and faster and has less overhead than many existing 3d frameworks. and it has a functional data-driven style inspired by react.</h3>
       <br>
