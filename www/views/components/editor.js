@@ -23,12 +23,12 @@ module.exports = function (name) {
   var iframe = document.createElement('iframe')
 
   css(container, {
-    width: '600px', 
+    width: '650px', 
     height: window.innerHeight, 
     position: 'fixed',
     top: '0',
     right: '230px',
-    fontSize: '90%',
+    fontSize: '80%',
     opacity: 0.9,
     display: 'inline-block'
   })
@@ -156,6 +156,7 @@ module.exports = function (name) {
   })
 
   var button = document.createElement('div')
+  button.className = 'button'
   css(button, {
     position: 'fixed',
     right: '10px',

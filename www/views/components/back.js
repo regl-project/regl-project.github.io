@@ -1,6 +1,7 @@
 var css = require('dom-css')
 
 var button = document.createElement('a')
+button.className = 'button'
 button.href = '/'
 css(button, {
   position: 'fixed',

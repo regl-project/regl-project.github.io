@@ -160,6 +160,10 @@ a:hover {
   background: rgb(40, 40, 40);
 }
 
+.button:hover {
+  opacity: 0.9 !important;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }
