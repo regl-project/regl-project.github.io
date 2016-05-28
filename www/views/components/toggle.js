@@ -1,6 +1,6 @@
 var css = require('dom-css')
 
-module.exports = function toggle () {
+module.exports = function Toggle () {
   var button = document.createElement('div')
   button.className = 'button'
   css(button, {

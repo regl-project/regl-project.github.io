@@ -1,6 +1,6 @@
 var css = require('dom-css')
 
-module.exports = function () {
+module.exports = function Back () {
   var button = document.createElement('a')
   button.className = 'button'
   button.href = '/'

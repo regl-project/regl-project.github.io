@@ -1,9 +1,14 @@
 var choo = require('choo')
 var css = require('dom-css')
+var Splash = require('./components/splash')
 
 module.exports = function (params, state, send) {
+
+  splash = Splash()
+
   return choo.view`
   <main>
+    ${splash}
     <div class='row' id='title'>
       <div class='myclass'>
         <h1 align='right'>regl</h1>

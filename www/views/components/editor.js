@@ -13,7 +13,7 @@ var Sidebar = require('./sidebar')
 var Toggle = require('./toggle')
 var Loading = require('./loading')
 
-module.exports = function (name) {
+module.exports = function Editor (list, selection) {
 
   var basecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'codemirror.css'))
   var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'base16-dark.css'))
@@ -90,7 +90,7 @@ module.exports = function (name) {
     css(demo, {display: 'none'})
   }
 
-  var sidebar = Sidebar(fetch)
+  var sidebar = Sidebar(list, selection, fetch)
   var toggle = Toggle()
   var loading = Loading()
 
@@ -106,7 +106,7 @@ module.exports = function (name) {
     }
   }
 
-  fetch(name)
+  fetch(selection)
 
   return choo.view`
   <div>

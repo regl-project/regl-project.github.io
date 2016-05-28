@@ -1,11 +1,7 @@
 var css = require('dom-css')
+var classed = require('element-class')
 
-module.exports = function sidebar (onclick) {
-  var examples = [
-    'basic', 'batch', 'bunny', 'camera', 'dds', 'dynamic', 
-    'elements', 'envmap', 'feedback', 'geomorph'
-  ]
-  
+module.exports = function Sidebar (list, selection, onclick) {
   var sidebar = document.createElement('div')
   sidebar.id = 'sidebar'
 
@@ -34,13 +30,17 @@ module.exports = function sidebar (onclick) {
   })
   sidebar.appendChild(heading)
 
-  examples.forEach(function (name) {
+  list.forEach(function (name) {
     var item = document.createElement('div')
     item.className = 'example'
     item.innerHTML = name
     item.onclick = function () {
+      classed(document.querySelector('.example')).remove('example-selected')
+      classed(document.querySelector('.example-selected')).remove('example-selected')
       onclick(name)
+      classed(item).add('example-selected')
     }
+    if (name === selection) classed(item).add('example-selected')
     css(item, {
       paddingLeft: '10px',
       paddingBottom: '5px',
