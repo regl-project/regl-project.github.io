@@ -156,6 +156,10 @@ a:hover {
   transition: all 0.2s;
 }
 
+.example:hover {
+  background: rgb(40, 40, 40);
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }

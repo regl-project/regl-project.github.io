@@ -126,13 +126,15 @@ module.exports = function (name) {
 
   examples.forEach(function (name) {
     var item = document.createElement('div')
+    item.className = 'example'
     item.innerHTML = name
     item.onclick = function () {
       fetch(name)
     }
     css(item, {
       paddingLeft: '10px',
-      marginBottom: '10px',
+      paddingBottom: '5px',
+      paddingTop: '5px',
       cursor: 'pointer',
       fontSize: '90%'
     })
