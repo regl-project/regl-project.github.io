@@ -1,36 +1,55 @@
-var choo = require('choo')
 var css = require('dom-css')
 
-module.exports = function (send) {
+module.exports = function sidebar (onclick) {
+  var examples = [
+    'basic', 'batch', 'bunny', 'camera', 'dds', 'dynamic', 
+    'elements', 'envmap', 'feedback', 'geomorph'
+  ]
+  
+  var sidebar = document.createElement('div')
+  sidebar.id = 'sidebar'
 
-  var container = document.createElement('div')
-  container.id = 'sidebar'
-
-  css(container, {
+  css(sidebar, {
     width: '200px', 
     height: window.innerHeight, 
     position: 'fixed',
     top: '0',
-    left: '0',
-    fontSize: '110%',
+    right: '0',
+    fontSize: '130%',
     opacity: 0.9,
     display: 'inline-block',
-    backgroundColor: 'rgb(90,90,90)'
+    backgroundColor: '#151515',
+    fontFamily: 'klartext_monolight',
+    padding: '10px',
+    color: 'rgb(210,210,210)'
   })
 
-  var examples = ['basic', 'bunny']
+  var heading = document.createElement('div')
+  heading.innerHTML = 'examples'
+  css(heading, {
+    paddingLeft: '10px',
+    marginTop: '10px',
+    marginBottom: '20px',
+    fontSize: '130%'
+  })
+  sidebar.appendChild(heading)
 
   examples.forEach(function (name) {
     var item = document.createElement('div')
+    item.className = 'example'
     item.innerHTML = name
     item.onclick = function () {
-      send('example:update', { payload: name })
+      onclick(name)
     }
-    container.appendChild(item)
+    css(item, {
+      paddingLeft: '10px',
+      paddingBottom: '5px',
+      paddingTop: '5px',
+      cursor: 'pointer',
+      fontSize: '90%'
+    })
+    sidebar.appendChild(item)
   })
 
-  return choo.view`
-  <div>
-    ${container}
-  </div>`
+  return sidebar
 }

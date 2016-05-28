@@ -9,6 +9,9 @@ var throttle = require('lodash.throttle')
 var debounce = require('lodash.debounce')
 require('codemirror/mode/javascript/javascript')
 var sandbox = require('browser-module-sandbox')
+var Sidebar = require('./sidebar')
+var Toggle = require('./toggle')
+var Loading = require('./loading')
 
 module.exports = function (name) {
 
@@ -61,10 +64,6 @@ module.exports = function (name) {
     iframe: iframe
   })
 
-  bundler.on('modules', function (data) {
-    console.log(data)
-  })
-
   bundler.on('bundleEnd', function (data) {
     css(loading, {opacity: 0})
     css(demo, {display: 'inherit'})
@@ -91,104 +90,19 @@ module.exports = function (name) {
     css(demo, {display: 'none'})
   }
 
-  var sidebar = document.createElement('div')
-  sidebar.id = 'sidebar'
+  var sidebar = Sidebar(fetch)
+  var toggle = Toggle()
+  var loading = Loading()
 
-  css(sidebar, {
-    width: '200px', 
-    height: window.innerHeight, 
-    position: 'fixed',
-    top: '0',
-    right: '0',
-    fontSize: '130%',
-    opacity: 0.9,
-    display: 'inline-block',
-    backgroundColor: '#151515',
-    fontFamily: 'klartext_monolight',
-    padding: '10px',
-    color: 'rgb(210,210,210)'
-  })
-
-  var examples = [
-    'basic', 'batch', 'bunny', 'camera', 'dds', 'dynamic', 
-    'elements', 'envmap', 'feedback', 'geomorph'
-  ]
-
-  var heading = document.createElement('div')
-  heading.innerHTML = 'examples'
-  css(heading, {
-    paddingLeft: '10px',
-    marginTop: '10px',
-    marginBottom: '20px',
-    fontSize: '130%'
-  })
-  sidebar.appendChild(heading)
-
-  examples.forEach(function (name) {
-    var item = document.createElement('div')
-    item.className = 'example'
-    item.innerHTML = name
-    item.onclick = function () {
-      fetch(name)
-    }
-    css(item, {
-      paddingLeft: '10px',
-      paddingBottom: '5px',
-      paddingTop: '5px',
-      cursor: 'pointer',
-      fontSize: '90%'
-    })
-    sidebar.appendChild(item)
-  })
-
-  var loading = document.createElement('div')
-  loading.className = 'loading'
-  loading.innerHTML = 'loading...'
-  css(loading, {
-    fontFamily: 'klartext_monolight',
-    fontSize: '130%',
-    position: 'absolute',
-    left: '20px',
-    top: '20px',
-    backgroundColor: 'rgb(40,40,40)',
-    padding: '10px',
-    opacity: 0
-  })
-
-  var button = document.createElement('div')
-  button.className = 'button'
-  css(button, {
-    position: 'fixed',
-    right: '10px',
-    bottom: '10px',
-    width: '50px',
-    height: '50px',
-    backgroundColor: 'rgb(40,40,40)',
-    opacity: 0.7,
-    color: 'white',
-    fontSize: '400%',
-    cursor: 'pointer'
-  })
-
-  var logo = document.createElement('span')
-  logo.className = 'logo'
-  logo.innerHTML = '<'
-  css(logo, {
-    position: 'fixed',
-    right: '19px',
-    bottom: '0px'
-  })
-  button.appendChild(logo)
-
-  button.onclick = function () {
+  toggle.onclick = function () {
     if (sidebar.style.display == 'none') {
       css(sidebar, {display: 'inherit'})
       css(container, {display: 'inherit', pointerEvents: 'all'})
-      css(logo, {transform: 'rotate(0deg)', right: '19px'})
+      css(toggle.children[0], {transform: 'rotate(0deg)', right: '19px'})
     } else {
       css(sidebar, {display: 'none'})
       css(container, {display: 'none', pointerEvents: 'none'})
-      css(logo, {transform: 'rotate(90deg)', right: '15px'})
+      css(toggle.children[0], {transform: 'rotate(90deg)', right: '15px'})
     }
   }
 
@@ -197,7 +111,7 @@ module.exports = function (name) {
   return choo.view`
   <div>
     ${sidebar}
-    ${button}
+    ${toggle}
     ${loading}
     ${container}
     ${demo}

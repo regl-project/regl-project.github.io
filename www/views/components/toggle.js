@@ -1,12 +1,11 @@
 var css = require('dom-css')
 
-module.exports = function () {
-  var button = document.createElement('a')
+module.exports = function toggle () {
+  var button = document.createElement('div')
   button.className = 'button'
-  button.href = '/'
   css(button, {
     position: 'fixed',
-    left: '10px',
+    right: '10px',
     bottom: '10px',
     width: '50px',
     height: '50px',
@@ -14,18 +13,18 @@ module.exports = function () {
     opacity: 0.7,
     color: 'white',
     fontSize: '400%',
-    textAlign: 'center',
     cursor: 'pointer'
   })
 
   var logo = document.createElement('span')
+  logo.className = 'logo'
   logo.innerHTML = '<'
   css(logo, {
     position: 'fixed',
-    left: '15px',
+    right: '19px',
     bottom: '0px'
   })
   button.appendChild(logo)
 
-  return button  
+  return button
 }

@@ -7,8 +7,8 @@ module.exports = function (params, state, send) {
   var name = state.app.location.split('?')[1]
   name = name || 'basic'
   return choo.view`
-  <main class='tmp'>
+  <main>
     ${editor(name)}
-    ${back}
+    ${back()}
   </main>`
 }
