@@ -30,7 +30,6 @@ module.exports = function (params, state, send) {
       <h3>check out the sections below to learn more!</h3>
       </div>
     </div>
-    <br>
     <div class='row'>
       <div class='callout'>
         <a class='link' href='/examples'>examples</a>
