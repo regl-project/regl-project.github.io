@@ -148,6 +148,10 @@ a {
   background-color: #A0E185;
 }
 
+.white {
+  background-color: white;
+}
+
 .row {
   max-width: 1060px;
   margin-right: 0px;

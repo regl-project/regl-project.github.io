@@ -15,6 +15,8 @@ var Loading = require('./loading')
 
 module.exports = function Editor (list, selection) {
 
+  console.log('rendering editor')
+
   var basecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'codemirror.css'))
   var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'base16-dark.css'))
   insertcss(basecss)
