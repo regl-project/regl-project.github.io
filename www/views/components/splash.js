@@ -32,13 +32,25 @@ module.exports = function Splash () {
     subdivisions: 3
   })
 
+  var n = new perlin.Noise(Math.random())
+  var dx = []
+  var rnd
+ 
+  for (var x = 0; x < 200; x++) {
+    dx[x] = []
+    for (var y = 0; y < 200; y++) {
+      rnd = n.simplex2((x + 1) / 2, (y + 1) / 2)
+      dx[x][y] = [rnd * 255, rnd * 255, rnd * 255]
+    }
+  }
+
   var draw = regl({
     frag: `
-    precision mediump float;
+    precision highp float;
     uniform vec4 color;
+    uniform float time;
     varying vec2 vuv;
     varying vec3 vposition;
-    varying float vtime;
     vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
       return a + b*cos( 6.28318*(c*t+d) );
     }
@@ -47,10 +59,11 @@ module.exports = function Splash () {
       vec3 b = vec3(0.5, 0.5, 0.5);
       vec3 c = vec3(1.0, 1.0, 1.0);
       vec3 d = (0.05 * abs(vposition));
-      gl_FragColor = vec4(palette(sin(0.005 * vtime + 0.5), a, d, b, c), 1.0) * 1.5;
+      gl_FragColor = vec4(palette(sin(0.005 * time + 0.5), a, d, b, c), 1.0) * 1.5;
     }`,
 
     vert: `
+    precision highp float;
     uniform mat4 projection;
     uniform mat4 model;
     uniform mat4 view;
@@ -61,11 +74,9 @@ module.exports = function Splash () {
     attribute vec2 uv;
     varying vec2 vuv;
     varying vec3 vposition;
-    varying float vtime;
     void main () {
       vuv = uv;
       vposition = position;
-      vtime = time;
       vec3 displaced = position + normal * texture2D(displacement, uv).rgb * sin(0.005 * time) * 5.0;
       gl_Position = projection * view * model * vec4(displaced, 1.0);
     }`,
@@ -84,7 +95,7 @@ module.exports = function Splash () {
       color: [1, 0, 0, 1],
       model: mat4.scale(mat4.identity([]), mat4.identity([]), [2, 1, 2]),
       view: function (props, context) {
-        var t = 0.005 * context.count
+        var t = 0.005 * context.count / 2
         return mat4.lookAt([],
           [30 * Math.cos(t), 0, 30 * Math.sin(t)],
           [0, 0, 0],
@@ -98,34 +109,27 @@ module.exports = function Splash () {
           1000)
       },
       time: function (props, context) {
-        return context.count
+        return context.count / 2
       },
-      displacement: regl.prop('displacement')
+      displacement: regl.texture(dx)
     }
   })
 
-  var n = new perlin.Noise(Math.random())
-  var dx = []
-  var rnd
- 
-  for (var x = 0; x < 200; x++) {
-    dx[x] = []
-    for (var y = 0; y < 200; y++) {
-      rnd = n.simplex2((x + 1) / 2, (y + 1) / 2)
-      dx[x][y] = [rnd * 255, rnd * 255, rnd * 255]
-    }
-  }
+  var tick
 
-  var displacement = regl.texture(dx)
+  canvas.addEventListener('DOMNodeRemoved', function () {
+    if (tick) tick.cancel()
+  }, false)
 
-  draw({displacement: displacement})
-
-  // regl.frame(function (props, context) {
-  //   regl.clear({
-  //     depth: 1,
-  //     color: [0, 0, 0, 1]
-  //   })
-  // })
+  canvas.addEventListener('DOMNodeInserted',function () {
+    tick = regl.frame(function (props, context) {
+      regl.clear({
+        depth: 1,
+        color: [0, 0, 0, 1]
+      })
+      draw()
+    })
+  }, false)
 
   return canvas
 }

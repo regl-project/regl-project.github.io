@@ -5,22 +5,23 @@ var css = require('dom-css')
 var insertcss = require('insert-css')
 var codemirror = require('codemirror')
 var request = require('browser-request')
-var throttle = require('lodash.throttle')
 var debounce = require('lodash.debounce')
-require('codemirror/mode/javascript/javascript')
 var sandbox = require('browser-module-sandbox')
+require('codemirror/mode/javascript/javascript')
 var Sidebar = require('./sidebar')
 var Toggle = require('./toggle')
 var Loading = require('./loading')
 
-module.exports = function Editor (list, selection) {
+var selected = 'basic'
 
-  console.log('rendering editor')
+module.exports = function Editor (list, selection) {
 
   var basecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'codemirror.css'))
   var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'base16-dark.css'))
   insertcss(basecss)
   insertcss(themecss)
+
+  if (selection) selected = selection
 
   var container = document.createElement('div')
   container.id = 'editor'
@@ -82,6 +83,7 @@ module.exports = function Editor (list, selection) {
   })
 
   function fetch (name) {
+    selected = name
     var base = 'https://raw.githubusercontent.com/mikolalysenko/regl/gh-pages/example/'
     var path = base + name + '.js'
     request(path, function(er, response, body) {
@@ -92,7 +94,7 @@ module.exports = function Editor (list, selection) {
     css(demo, {display: 'none'})
   }
 
-  var sidebar = Sidebar(list, selection, fetch)
+  var sidebar = Sidebar(list, selected, fetch)
   var toggle = Toggle()
   var loading = Loading()
 
@@ -108,7 +110,7 @@ module.exports = function Editor (list, selection) {
     }
   }
 
-  fetch(selection)
+  fetch(selected)
 
   return choo.view`
   <div>

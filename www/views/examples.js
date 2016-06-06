@@ -4,8 +4,6 @@ var Back = require('./components/back')
 
 module.exports = function (params, state, send) {
   var selection = state.app.location.split('?')[1]
-  selection = selection || 'basic'
-
   var back = Back()
   var editor = Editor(state.examples.list, selection)
 
