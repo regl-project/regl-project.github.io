@@ -116,8 +116,8 @@ module.exports = function Splash () {
       view: function (props, context) {
         var t = 0.005 * context.count / 2
         return mat4.lookAt([],
-          [30 * Math.cos(t), 30 * Math.cos(t), 30 * Math.sin(t)],
-          [0, 2, 0],
+          [30 * Math.cos(t), 5, 30 * Math.sin(t)],
+          [0, 2.5, 0],
           [0, 1, 0])
       },
       projection: function (props, context) {
