@@ -56,12 +56,81 @@ module.exports = function Splash () {
     }
   }
 
-  var draw = regl({
+  var uniforms = {
+    color: [1, 0, 0, 1],
+    model: mat4.scale(mat4.identity([]), mat4.identity([]), [2, 1, 2]),
+    view: function (props, context) {
+      var t = 0.005 * context.count / 2
+      return mat4.lookAt([],
+        [30 * Math.cos(t), 5, 30 * Math.sin(t)],
+        [0, 2.5, 0],
+        [0, 1, 0])
+    },
+    projection: function (props, context) {
+      return mat4.perspective([],
+        Math.PI / 4,
+        context.viewportWidth / context.viewportHeight,
+        0.01,
+        1000)
+    },
+    time: function (props, context) {
+      return context.count / 2
+    },
+    displacement: regl.texture(dx)
+  }
+
+  var drawOutline = regl({
     frag: `
     precision highp float;
     uniform vec4 color;
     uniform float time;
-    uniform bool wireframe;
+    varying vec2 vuv;
+    varying vec3 vposition;
+    
+    void main () {
+      gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0);
+    }`,
+
+    vert: `
+    precision highp float;
+    uniform mat4 projection;
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform sampler2D displacement;
+    uniform float time;
+    attribute vec3 position;
+    attribute vec3 normal;
+    attribute vec2 uv;
+    varying vec2 vuv;
+    varying vec3 vposition;
+    void main () {
+      vuv = uv;
+      vposition = position;
+      vec3 displaced = position + normal * texture2D(displacement, uv).rgb * abs(sin(0.005 * time) * 5.0);
+      displaced = displaced + normal * 0.04;
+      gl_Position = projection * view * model * vec4(displaced, 1.0);
+    }`,
+
+    attributes: {
+      position: regl.buffer(mesh.positions.slice(0, 1000)),
+      normal: regl.buffer(normals(mesh.cells, mesh.positions)),
+      uv: regl.buffer(mesh.uvs)
+    },
+
+    elements: regl.elements(mesh.cells),
+
+    primitive: 'triangles',
+
+    uniforms: uniforms,
+
+    count: 799
+  })
+
+  var drawTriangles = regl({
+    frag: `
+    precision highp float;
+    uniform vec4 color;
+    uniform float time;
     varying vec2 vuv;
     varying vec3 vposition;
     vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
@@ -72,11 +141,7 @@ module.exports = function Splash () {
       vec3 b = vec3(0.5, 0.5, 0.5);
       vec3 c = vec3(1.0, 1.0, 1.0);
       vec3 d = (0.05 * abs(vposition));
-      if (wireframe) {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-      } else {
-        gl_FragColor = vec4(palette(sin(0.005 * time + 0.5), a, d, b, c), 1.0) * 1.5;
-      }
+      gl_FragColor = vec4(palette(sin(0.005 * time + 0.5), a, d, b, c), 1.0) * 1.5;
     }`,
 
     vert: `
@@ -106,33 +171,9 @@ module.exports = function Splash () {
 
     elements: regl.elements(mesh.cells),
 
-    primitive: regl.prop('mode'),
+    primitive: 'triangles',
 
-    lineWidth: 1,
-
-    uniforms: {
-      color: [1, 0, 0, 1],
-      model: mat4.scale(mat4.identity([]), mat4.identity([]), [2, 1, 2]),
-      view: function (props, context) {
-        var t = 0.005 * context.count / 2
-        return mat4.lookAt([],
-          [30 * Math.cos(t), 5, 30 * Math.sin(t)],
-          [0, 2.5, 0],
-          [0, 1, 0])
-      },
-      projection: function (props, context) {
-        return mat4.perspective([],
-          Math.PI / 4,
-          context.viewportWidth / context.viewportHeight,
-          0.01,
-          1000)
-      },
-      time: function (props, context) {
-        return context.count / 2
-      },
-      displacement: regl.texture(dx),
-      wireframe: regl.prop('wireframe')
-    },
+    uniforms: uniforms,
 
     count: 799
   })
@@ -149,8 +190,8 @@ module.exports = function Splash () {
         depth: 1,
         color: [0, 0, 0, 1]
       })
-      draw({mode: 'lines', wireframe: true})
-      draw({mode: 'triangles', wireframe: false})
+      drawOutline()
+      drawTriangles()
     })
   }, false)
 
