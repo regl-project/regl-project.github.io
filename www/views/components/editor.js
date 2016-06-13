@@ -73,7 +73,7 @@ module.exports = function Editor (list, selection) {
   })
 
   function run () {
-    bundler.bundle(editor.getValue(), {'regl': '0.5.0'})
+    bundler.bundle(editor.getValue(), {'regl': '0.6.0'})
   }
 
   var debounced = debounce(run, 250)
