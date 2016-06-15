@@ -131,15 +131,16 @@ module.exports = function Splash () {
     uniform float time;
     varying vec2 vuv;
     varying vec3 vposition;
+    varying vec3 vnormal;
     vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
       return a + b*cos( 6.28318*(c*t+d) );
     }
     void main () {
       vec3 a = vec3(0.5, 0.5, 0.5);
       vec3 b = vec3(0.5, 0.5, 0.5);
-      vec3 c = vec3(1.0, 1.0, 1.0);
+      vec3 c = abs(vnormal);
       vec3 d = (0.05 * abs(vposition));
-      gl_FragColor = vec4(palette(sin(0.005 * time + 0.5), a, d, b, c), 1.0) * 1.5;
+      gl_FragColor = vec4(palette(sin(0.005 * time + 0.5), a, d, b, c), 1.0) * 1.0;
     }`,
 
     vert: `
@@ -154,9 +155,11 @@ module.exports = function Splash () {
     attribute vec2 uv;
     varying vec2 vuv;
     varying vec3 vposition;
+    varying vec3 vnormal;
     void main () {
       vuv = uv;
       vposition = position;
+      vnormal = normal;
       vec3 displaced = position + normal * texture2D(displacement, uv).rgb * abs(sin(0.005 * time) * 5.0);
       gl_Position = projection * view * model * vec4(displaced, 1.0);
     }`,
