@@ -42,8 +42,6 @@ module.exports = function Splash () {
   mesh.uvs = uvs
   mesh.normals = ns
 
-  console.log(mesh)
-
   var n = new perlin.Noise(Math.random())
   var dx = []
   var rnd
@@ -107,7 +105,7 @@ module.exports = function Splash () {
       vuv = uv;
       vposition = position;
       vec3 displaced = position + normal * texture2D(displacement, uv).rgb * abs(sin(0.005 * time) * 5.0);
-      displaced = displaced + normal * 0.04;
+      displaced = displaced - normal * 0.04;
       gl_Position = projection * view * model * vec4(displaced, 1.0);
     }`,
 
