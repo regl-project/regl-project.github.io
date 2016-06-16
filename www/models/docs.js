@@ -12,7 +12,6 @@ module.exports = {
   state: { contents: '', position: ''},
   subscriptions: [
     function (send) {
-      console.log('fetching')
       marked.setOptions({
         highlight: function (code, lang) {
           var out = lang ? hl.highlight(lang, code) : hl.highlightAuto(code)
@@ -28,7 +27,6 @@ module.exports = {
         }
       }
       request(source, function (er, response, body) {
-        console.log('got markdown')
         var markdown = marked(body, {renderer: renderer})
         send('docs:update', {payload: markdown})
       })
