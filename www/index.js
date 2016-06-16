@@ -2,16 +2,8 @@ var choo = require('choo')
 
 var app = choo()
 
-app.model({
-  namespace: 'examples',
-  state: { list: [
-    'basic', 'batch', 'bunny', 'camera', 'dds', 'dynamic', 
-    'elements', 'envmap', 'feedback', 'geomorph', 'life',
-    'lighting', 'mipmap', 'particles', 'scope', 'text',
-    'texture', 'theta360', 'tile', 'video'
-    ] 
-  }
-})
+app.model(require('./models/docs'))
+app.model(require('./models/examples'))
 
 app.router(function (route) {
   return [
@@ -28,5 +20,9 @@ document.body.appendChild(tree)
 var fs = require('fs')
 var path = require('path')
 var insertcss = require('insert-css')
-var basecss = fs.readFileSync(path.join(__dirname,'style.css'))
+var basecss = fs.readFileSync(path.join(__dirname, 'style.css'))
+var markdowncss = fs.readFileSync(path.join(__dirname, 'lib', 'markdown-style.css'))
+var highlightcss = fs.readFileSync(path.join(__dirname, 'lib', 'tomorrow-night.css'))
 insertcss(basecss)
+insertcss(markdowncss)
+insertcss(highlightcss)
