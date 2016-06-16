@@ -67,6 +67,12 @@ a {
 	
 }
 
+ .hero h2{
+    font-size: 325%;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
 .about {
 	background-color: rgb(40,40,40);
 	width: 70%;
@@ -226,6 +232,12 @@ a {
     padding-right: 20px;
 	  padding-left: 20px;
 	}
+
+   .hero h2{
+    font-size: 225%;
+    padding-right: 20px;
+    padding-left: 20px;
+  }  
 
   .about {
 	  width: 85%;
