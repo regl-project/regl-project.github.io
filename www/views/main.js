@@ -4,7 +4,9 @@ var Splash = require('./components/splash')
 
 module.exports = function (params, state, send) {
 
-  splash = Splash()
+  console.log('rendering main')
+
+  splash = Splash(params, state, send)
 
   return choo.view`
   <main>

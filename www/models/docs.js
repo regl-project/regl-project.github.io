@@ -28,6 +28,7 @@ module.exports = {
         }
       }
       request(source, function (er, response, body) {
+        console.log('got markdown')
         var markdown = marked(body, {renderer: renderer})
         send('docs:update', {payload: markdown})
       })

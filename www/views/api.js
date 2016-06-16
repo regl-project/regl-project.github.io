@@ -15,9 +15,8 @@ module.exports = function (params, state, send) {
     height: window.innerHeight, 
     position: 'fixed',
     padding: '30px',
-    top: '250px',
-    left: '0px',
-    bottom: '100px',
+    top: '0px',
+    right: '0px',
     fontSize: '100%',
     opacity: 0.9,
     display: 'inline-block',
@@ -56,10 +55,10 @@ module.exports = function (params, state, send) {
   return choo.view`
   <main>
     <div class='row' id='title'>
-      <div class='hero'>
+      <div class='hero-medium'>
         <h1 align='right'>api</h1>
       </div>
-      <div class='color-block-big green'>
+      <div class='color-block-medium green'>
       </div>
       <div>
     ${container}

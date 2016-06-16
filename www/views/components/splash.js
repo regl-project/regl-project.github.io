@@ -6,6 +6,7 @@ var perlin = require('noisejs')
 var reindex = require('mesh-reindex')
 var unindex = require('unindex-mesh')
 
+
 module.exports = function Splash () {
   var canvas = document.createElement('canvas')
   canvas.id = 'splash'
@@ -35,8 +36,6 @@ module.exports = function Splash () {
   })
   var uvs = mesh.uvs
   var ns = mesh.normals
-
-  console.log(mesh)
 
   mesh = reindex(unindex(mesh.positions, mesh.cells))
   mesh.uvs = uvs
@@ -179,21 +178,28 @@ module.exports = function Splash () {
     count: 799
   })
 
+  // crazy hack to prevent starting frame loop multiple times
+
   var tick
 
-  canvas.addEventListener('DOMNodeRemoved', function () {
-    if (tick) tick.cancel()
+  canvas.addEventListener('DOMNodeInserted',function () {
+    if (!document.querySelector('#splash')) {
+      if (tick) tick.cancel()
+      tick = regl.frame(function (props, context) {
+        regl.clear({
+          depth: 1,
+          color: [0, 0, 0, 1]
+        })
+        drawOutline()
+        drawTriangles()
+      })
+    }
   }, false)
 
-  canvas.addEventListener('DOMNodeInserted',function () {
-    tick = regl.frame(function (props, context) {
-      regl.clear({
-        depth: 1,
-        color: [0, 0, 0, 1]
-      })
-      drawOutline()
-      drawTriangles()
-    })
+  canvas.addEventListener('DOMNodeRemoved', function () {
+    if (document.querySelector('#splash')) {
+      if (tick) tick.cancel()
+    }
   }, false)
 
   return canvas
