@@ -1,82 +1,36 @@
 {
-  "name": "regl",
-  "version": "0.4.0",
-  "description": "WebGL",
-  "main": "regl.js",
-  "directories": {
-    "example": "example"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "angle-normals": "^1.0.0",
-    "baboon-image": "^2.0.0",
-    "bl": "^1.1.2",
-    "browserify": "^13.0.0",
-    "budo": "^8.1.0",
-    "bunny": "^1.0.1",
-    "canvas-fit": "^1.5.0",
-    "canvas-orbit-camera": "^1.0.2",
-    "coverify": "^1.4.1",
-    "falafel": "^1.2.0",
-    "faucet": "0.0.1",
-    "gl": "^3.0.5",
-    "gl-mat4": "^1.1.4",
-    "glob": "^7.0.3",
-    "google-closure-compiler": "^20160315.2.0",
-    "hsv2rgb": "^1.1.0",
-    "indexhtmlify": "^1.2.1",
-    "mkdirp": "^0.5.1",
-    "mouse-change": "^1.3.0",
-    "ncp": "^2.0.0",
-    "runscript": "^1.1.0",
-    "smokestack": "^3.4.1",
-    "snazzy": "^3.0.0",
-    "standard": "^6.0.7",
-    "tap-browser-color": "^0.1.2",
-    "tape": "^4.4.0",
-    "through2": "^2.0.1",
-    "vectorize-text": "^3.0.2"
-  },
+  "name": "regl-site",
+  "version": "0.0.0",
+  "description": "website for regl",
+  "main": "index.js",
   "scripts": {
-    "test": "standard | snazzy && tape test/*.js | faucet",
-    "test-browser": "budo test/util/browser.js --open",
-    "coverage": "browserify test/util/browser.js -t coverify | smokestack | coverify",
-    "bench": "budo bench/index.js --open",
-    "build": "npm run build-script && npm run build-min && npm run build-bench && npm run build-gallery",
-    "build-script": "browserify regl.js --standalone reglInit > dist/regl.js",
-    "build-min": "node bin/build-min.js",
-    "build-bench": "browserify bench/index.js | indexhtmlify > www/bench.html",
-    "build-gallery": "node bin/build-gallery.js",
-    "build-site": "cd www && npm run bundle"
+    "bundle": "browserify index.js -o bundle.js",
+    "start": "budo index.js:bundle.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mikolalysenko/regl.git"
+  "browserify": {
+    "transform": "brfs"
   },
-  "keywords": [
-    "webgl",
-    "stackgl",
-    "regl",
-    "gl",
-    "graphics",
-    "computer graphics",
-    "opengl",
-    "glsl",
-    "data",
-    "flow",
-    "reactive",
-    "functional"
-  ],
-  "author": "Mikola Lysenko",
+  "author": "",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/mikolalysenko/regl/issues"
-  },
-  "standard": {
-    "ignore": [
-      "dist/*",
-      "www/*"
-    ]
-  },
-  "homepage": "https://mikolalysenko.github.io/regl"
+  "dependencies": {
+    "angle-normals": "^1.0.0",
+    "brfs": "^1.4.3",
+    "browser-request": "^0.3.3",
+    "canvas-fit": "^1.5.0",
+    "choo": "^2.1.3",
+    "codemirror": "^5.14.2",
+    "dom-css": "^2.0.0",
+    "element-class": "^0.2.2",
+    "gl-mat4": "^1.1.4",
+    "highlight.js": "^9.4.0",
+    "insert-css": "^0.2.0",
+    "javascript-editor": "^1.0.3",
+    "lodash.debounce": "^4.0.6",
+    "mesh-reindex": "^1.0.0",
+    "noisejs": "^2.1.0",
+    "object-extend": "^0.5.0",
+    "primitive-icosphere": "^1.0.2",
+    "regl": "^0.5.0",
+    "unindex-mesh": "^2.0.0"
+  }
 }
