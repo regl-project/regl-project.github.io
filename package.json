@@ -32,5 +32,8 @@
     "primitive-icosphere": "^1.0.2",
     "regl": "^0.5.0",
     "unindex-mesh": "^2.0.0"
+  },
+  "devDependencies": {
+    "budo": "^8.3.0"
   }
 }
