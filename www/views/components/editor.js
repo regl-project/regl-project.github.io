@@ -17,7 +17,7 @@ var selected = 'basic'
 module.exports = function Editor (list, selection) {
 
   var basecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'codemirror.css'))
-  var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'base16-dark.css'))
+  var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'cm-tomorrow-night.css'))
   insertcss(basecss)
   insertcss(themecss)
 
@@ -42,7 +42,7 @@ module.exports = function Editor (list, selection) {
   var editor = codemirror(container, {
     autofocus: true, 
     mode: 'javascript', 
-    theme: 'base16-dark',
+    theme: 'tomorrow-night',
     lineWrapping: true
   })
 

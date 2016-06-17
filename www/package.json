@@ -28,6 +28,7 @@
     "lodash.debounce": "^4.0.6",
     "mesh-reindex": "^1.0.0",
     "noisejs": "^2.1.0",
+    "object-extend": "^0.5.0",
     "primitive-icosphere": "^1.0.2",
     "regl": "^0.5.0",
     "unindex-mesh": "^2.0.0"

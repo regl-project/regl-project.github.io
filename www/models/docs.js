@@ -26,9 +26,11 @@ module.exports = {
           return '<a href=' + href + '>' + text + '</a>'
         }
       }
-      request(source, function (er, response, body) {
-        var markdown = marked(body, {renderer: renderer})
-        send('docs:update', {payload: markdown})
+      document.addEventListener("DOMContentLoaded", function () {
+        request(source, function (er, response, body) {
+          var markdown = marked(body, {renderer: renderer})
+          send('docs:update', {payload: markdown})
+        })
       })
     }
   ],

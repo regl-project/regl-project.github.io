@@ -210,6 +210,18 @@ a {
   opacity: 0.9 !important;
 }
 
+.switch {
+  opacity: 0.7;
+}
+
+.switch:hover {
+  opacity: 0.9 !important;
+}
+
+.code-body span {
+
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }

@@ -3,7 +3,6 @@ var path = require('path')
 var choo = require('choo')
 var back = require('./components/back')
 var css = require('dom-css')
-var insertcss = require('insert-css')
 
 module.exports = function (params, state, send) {
 
