@@ -6,12 +6,11 @@ var list = ['threejs', 'webgl', 'regl', 'twgl']
 
 module.exports = {
   namespace: 'comparisons',
-  state: { list: list, selected: 'threejs', contents: {} },
+  state: { list: list, selected: 'regl', contents: {} },
   subscriptions: [
     function (send) {
       list.forEach(function (name) {
         request(source, function (er, response, body) {
-          console.log('fetching:' + name)
           send('comparisons:update', {name: name, body: body})
         })
       })

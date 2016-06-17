@@ -419,7 +419,7 @@
 .markdown-body table th,
 .markdown-body table td {
   padding: 6px 13px;
-  border: 1px solid #ddd;
+  border: 2px solid rgb(35,35,35);
 }
 
 .markdown-body table tr {
@@ -669,6 +669,7 @@
 
 .markdown-body a code {
   text-decoration: none;
+  border-bottom: none;
   color: rgb(220,220,220);
 }
 

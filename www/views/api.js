@@ -5,13 +5,12 @@ var back = require('./components/back')
 var css = require('dom-css')
 
 module.exports = function (params, state, send) {
-
   var hash = state.docs.position.split('#')[1] || state.app.location.split('#')[1]
 
   var container = document.createElement('div')
   css(container, {
     width: '65%', 
-    height: window.innerHeight, 
+    height: window.innerHeight - 60, 
     position: 'fixed',
     padding: '30px',
     top: '0px',
@@ -29,12 +28,26 @@ module.exports = function (params, state, send) {
   wrapper.innerHTML = state.docs.contents
   wrapper.id = 'wrapper'
 
+  var counter = [0, 0, 0]
+
   function descend (node) {
     for (var i = 0; i < node.childNodes.length; i++) {
       var child = node.childNodes[i]
-      if (child.className == 'internal-link') {
-        child.onclick = function () {
-          send('docs:move', {payload: child.href})
+      if (child.id === 'constructor') {
+        if (counter[0] > 0) child.id = 'constructor-' + counter[0]
+        counter[0] += 1
+      }
+      if (child.id === 'update') {
+        if (counter[1] > 0) child.id = 'update-' + counter[1]
+        counter[1] += 1
+      }
+      if (child.id === 'destroy') {
+        if (counter[2] > 0) child.id = 'destroy-' + counter[2]
+        counter[2] += 1
+      }
+      if (child.className === 'internal-link') {
+        child.onclick = function (event) {
+          send('docs:move', {payload: event.target.href})
         }
       }
       descend(child)
@@ -67,4 +80,3 @@ module.exports = function (params, state, send) {
     </div>
   </main>`
  }
-

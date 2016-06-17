@@ -5,7 +5,7 @@ var hl = require('highlight.js')
 var insertcss = require('insert-css')
 var request = require('browser-request')
 
-var source = 'https://raw.githubusercontent.com/freeman-lab/regl/api-page/API.md'
+var source = 'https://raw.githubusercontent.com/mikolalysenko/regl/gh-pages/API.md'
 
 module.exports = {
   namespace: 'docs',

@@ -5,10 +5,6 @@ var request = require('browser-request')
 var hl = require('highlight.js')
 
 module.exports = function (params, state, send) {
-
-  console.log('rendering')
-  console.log(state.comparisons)
-
   function main (code) {
     var container = document.createElement('div')
     container.id ='text'
@@ -57,6 +53,12 @@ module.exports = function (params, state, send) {
       fontFamily: 'klartext_monolight',
       cursor: 'pointer'
     })
+    if (label === state.comparisons.selected) {
+      console.log('hey')
+      css(toggle, {opacity: 0.9})
+    } else {
+      css(toggle, {opacity: 0.7})
+    }
     toggles.push(toggle)
     toggle.onclick = function () {
       send('comparisons:select', {payload: label})
