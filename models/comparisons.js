@@ -6,7 +6,7 @@ var list = ['threejs', 'webgl', 'regl', 'twgl']
 
 module.exports = {
   namespace: 'comparisons',
-  state: { list: list, selected: 'regl', contents: {} },
+  state: { list: list, selected: 'regl', contents: null },
   subscriptions: [
     function (send) {
       list.forEach(function (name) {
@@ -24,7 +24,7 @@ module.exports = {
       var toadd = {}
       toadd[action.name] = action.body
       return Object.assign(state, 
-        {contents: extend(state.contents, toadd)})
+        {contents: extend(state.contents || {}, toadd)})
     },
   }
 }

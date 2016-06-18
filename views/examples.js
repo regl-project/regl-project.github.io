@@ -7,7 +7,9 @@ module.exports = function (params, state, send) {
   var back = Back()
   var editor = Editor(state.examples.list, selection)
 
-  if (state.docs.contents) {
+  // awkward hack to prevent redrawing when loading subsscriptions
+
+  if (state.docs.contents && Object.keys(state.comparisons.contents).length == 4) {
     return choo.view`
     <main>
       ${editor}
@@ -16,6 +18,7 @@ module.exports = function (params, state, send) {
   } else {
     return choo.view`
     <main>
+      ${back}
     </main>`
   }
 }

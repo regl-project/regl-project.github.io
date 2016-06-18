@@ -102,11 +102,11 @@ module.exports = function Editor (list, selection) {
     if (sidebar.style.display == 'none') {
       css(sidebar, {display: 'inherit'})
       css(container, {display: 'inherit', pointerEvents: 'all'})
-      css(toggle.children[0], {transform: 'rotate(0deg)', right: '19px'})
+      css(toggle.children[0], {transform: 'rotate(90deg)', right: '14px', bottom: '10px'})
     } else {
       css(sidebar, {display: 'none'})
       css(container, {display: 'none', pointerEvents: 'none'})
-      css(toggle.children[0], {transform: 'rotate(90deg)', right: '15px'})
+      css(toggle.children[0], {transform: 'rotate(0deg)', right: '23px', bottom: '5px'})
     }
   }
 

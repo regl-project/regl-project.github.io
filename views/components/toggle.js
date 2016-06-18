@@ -12,17 +12,19 @@ module.exports = function Toggle () {
     backgroundColor: 'rgb(40,40,40)',
     opacity: 0.7,
     color: 'white',
-    fontSize: '400%',
-    cursor: 'pointer'
+    fontSize: '350%',
+    cursor: 'pointer',
+    letterSpacing: '-16px'
   })
 
   var logo = document.createElement('span')
   logo.className = 'logo'
-  logo.innerHTML = '<'
+  logo.innerHTML = '|||'
   css(logo, {
     position: 'fixed',
-    right: '19px',
-    bottom: '0px'
+    right: '14px',
+    bottom: '10px',
+    transform: 'rotate(90deg)'
   })
   button.appendChild(logo)
 
