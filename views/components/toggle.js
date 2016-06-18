@@ -12,7 +12,7 @@ module.exports = function Toggle () {
     backgroundColor: 'rgb(40,40,40)',
     opacity: 0.7,
     color: 'white',
-    fontSize: '350%',
+    fontSize: '325%',
     cursor: 'pointer',
     letterSpacing: '-16px'
   })
@@ -22,8 +22,8 @@ module.exports = function Toggle () {
   logo.innerHTML = '|||'
   css(logo, {
     position: 'fixed',
-    right: '14px',
-    bottom: '10px',
+    right: '17px',
+    bottom: '13px',
     transform: 'rotate(90deg)'
   })
   button.appendChild(logo)
