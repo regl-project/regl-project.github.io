@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bundle": "browserify index.js -o bundle.js",
-    "start": "budo index.js:bundle.js"
+    "start": "budo index.js:bundle.js -P"
   },
   "browserify": {
     "transform": "brfs"
@@ -31,6 +31,7 @@
     "mesh-reindex": "^1.0.0",
     "noisejs": "^2.1.0",
     "object-extend": "^0.5.0",
+    "on-load": "^2.0.0",
     "primitive-icosphere": "^1.0.2",
     "regl": "^0.5.0",
     "unindex-mesh": "^2.0.0"

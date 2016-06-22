@@ -37,9 +37,6 @@ module.exports = {
   reducers: {
     update: function (action, state) {
       return { contents: action.payload , position: state.position }
-    },
-    move: function (action, state) {
-      return { contents: state.contents, position: action.payload }
     }
   }
 }

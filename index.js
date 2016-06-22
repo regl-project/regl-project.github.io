@@ -2,6 +2,7 @@ var choo = require('choo')
 
 var app = choo()
 
+app.model(require('./models/app'))
 app.model(require('./models/docs'))
 app.model(require('./models/examples'))
 app.model(require('./models/comparisons'))
@@ -15,7 +16,7 @@ app.router(function (route) {
   ]}
 )
 
-var tree = app.start()
+var tree = app.start({ href: false })
 document.body.appendChild(tree)
 
 var fs = require('fs')

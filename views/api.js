@@ -3,11 +3,11 @@ var path = require('path')
 var choo = require('choo')
 var back = require('./components/back')
 var css = require('dom-css')
+var onload = require('on-load')
 
 module.exports = function (params, state, send) {
-  var hash = state.docs.position.split('#')[1] || state.app.location.split('#')[1]
-
   var container = document.createElement('div')
+
   css(container, {
     width: '65%', 
     height: window.innerHeight - 60, 
@@ -34,21 +34,16 @@ module.exports = function (params, state, send) {
     for (var i = 0; i < node.childNodes.length; i++) {
       var child = node.childNodes[i]
       if (child.id === 'constructor') {
-        if (counter[0] > 0) child.id = 'constructor-' + counter[0]
+        if (counter[0] >= 0) child.id = 'constructor-' + counter[0]
         counter[0] += 1
       }
       if (child.id === 'update') {
-        if (counter[1] > 0) child.id = 'update-' + counter[1]
+        if (counter[1] >= 0) child.id = 'update-' + counter[1]
         counter[1] += 1
       }
       if (child.id === 'destroy') {
-        if (counter[2] > 0) child.id = 'destroy-' + counter[2]
+        if (counter[2] >= 0) child.id = 'destroy-' + counter[2]
         counter[2] += 1
-      }
-      if (child.className === 'internal-link') {
-        child.onclick = function (event) {
-          send('docs:move', {payload: event.target.href})
-        }
       }
       descend(child)
     }
@@ -60,11 +55,7 @@ module.exports = function (params, state, send) {
     container.appendChild(wrapper)
   }
 
-  if (hash) {
-    location.hash = hash
-  }
-  
-  return choo.view`
+  var element = choo.view`
   <main>
     <div class='row' id='title'>
       <div class='hero-medium'>
@@ -73,10 +64,25 @@ module.exports = function (params, state, send) {
       <div class='color-block-medium green'>
       </div>
       <div>
-    ${container}
-    </div>
-    <div>
-    ${back()}
+        ${container}
+      </div>
+      <div>
+        ${back()}
+      </div>
     </div>
   </main>`
+
+  onload(element, function () {
+    console.log('wat wat wat aw ta wt a wt a wt awt')
+    if (location.hash) {
+      setTimeout(function () {
+        console.log('location.hash', location.hash)
+        var el = document.querySelector(location.hash)
+        console.log('load element', el)
+        if (el) window.scrollTo(0, el.offsetTop)
+      }, 1000)
+    }
+  })
+
+  return element
  }
