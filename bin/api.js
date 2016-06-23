@@ -49,17 +49,17 @@ function parse (node) {
     }
 
     if (child.id === 'constructor') {
-      if (counter[0] >= 0) child.id = 'constructor-' + counter[0]
+      if (counter[0] > 0) child.id = 'constructor-' + counter[0]
       counter[0] += 1
     }
 
     if (child.id === 'update') {
-      if (counter[1] >= 0) child.id = 'update-' + counter[1]
+      if (counter[1] > 0) child.id = 'update-' + counter[1]
       counter[1] += 1
     }
 
     if (child.id === 'destroy') {
-      if (counter[2] >= 0) child.id = 'destroy-' + counter[2]
+      if (counter[2] > 0) child.id = 'destroy-' + counter[2]
       counter[2] += 1
     }
 

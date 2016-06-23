@@ -1469,7 +1469,7 @@ teapotMesh.draw({
 <hr>
 <h3 id="buffers">Buffers</h3>
 <p><code>regl.buffer</code> wraps WebGL array buffer objects.</p>
-<h4 id="constructor-0">Constructor</h4>
+<h4 id="constructor">Constructor</h4>
 <pre><code class="lang-javascript"><span class="hljs-comment">// Creates an empty length 100 buffer</span>
 <span class="hljs-keyword">var</span> zeroBuffer = regl.buffer(<span class="hljs-number">100</span>)
 
@@ -1542,7 +1542,7 @@ teapotMesh.draw({
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateBuffer.xml"><code>gl.createBuffer</code></a></li>
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml"><code>gl.bufferData</code></a></li>
 </ul>
-<h4 id="update-0">Update</h4>
+<h4 id="update">Update</h4>
 <p>To reinitialize a buffer in place, we can call the buffer as a function:</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// First we create a buffer</span>
 <span class="hljs-keyword">var</span> myBuffer = regl.buffer(<span class="hljs-number">5</span>)
@@ -1592,7 +1592,7 @@ myBuffer.subdata([[<span class="hljs-number">7</span>, <span class="hljs-number"
 <ul>
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferSubData.xml"><code>gl.bufferSubData</code></a></li>
 </ul>
-<h4 id="destroy-0">Destroy</h4>
+<h4 id="destroy">Destroy</h4>
 <p>Calling <code>.destroy()</code> on a buffer releases all resources associated to the buffer:</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// Create a buffer</span>
 <span class="hljs-keyword">var</span> myBuffer = regl.buffer(<span class="hljs-number">10</span>)
