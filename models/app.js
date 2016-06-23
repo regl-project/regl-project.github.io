@@ -22,7 +22,6 @@ module.exports = {
         } else {
           window.location.hash = node.hash
           var el = document.querySelector(node.hash)
-          console.log('el', el)
           window.scrollTo(0, el.offsetTop)
         }
       }

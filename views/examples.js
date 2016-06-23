@@ -9,7 +9,7 @@ module.exports = function (params, state, send) {
 
   // awkward hack to prevent redrawing when loading subsscriptions
 
-  if (state.docs.contents && Object.keys(state.comparisons.contents).length == 4) {
+  if (state.docs.content && Object.keys(state.comparisons.contents).length == 4) {
     return choo.view`
     <main>
       ${editor}

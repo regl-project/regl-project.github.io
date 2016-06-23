@@ -43,6 +43,14 @@ a {
 	text-decoration: none;
 }
 
+.toc a {
+  color: rgb(190, 190, 190);
+}
+
+.toc a:hover, .toc a:focus {
+  color: #fff;
+}
+
 #title {
   margin-top: 50px;
 	margin-left:0px;
