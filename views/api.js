@@ -8,12 +8,6 @@ var tocHeight = '100%'
 
 module.exports = function (params, state, send) {
   var container = document.createElement('div')
-
-  css(container, {
-    fontFamily: 'Helvetica',
-    fontSize: '100%'
-  })
-
   var tocWrapper = document.createElement('div')
   tocWrapper.className = 'toc'
   tocWrapper.innerHTML = state.docs.toc
