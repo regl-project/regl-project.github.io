@@ -24,7 +24,7 @@ module.exports = function (params, state, send) {
     margin: '0px 0px 30px 0px',
     height: tocHeight,
     background: 'rgb(30,30,30)',
-    opacity: 0.7,
+    opacity: 0.9,
     paddingLeft: '10px'
   })
 
