@@ -65,6 +65,10 @@ module.exports = function (params, state, send) {
     }
   })
 
+  var comparisons = state.comparisons.contents ? 
+    state.comparisons.contents[state.comparisons.selected] :
+    null
+
   return choo.view`
   <main>
     <div class='row' id='title'>
@@ -74,7 +78,7 @@ module.exports = function (params, state, send) {
       <div class='color-block-medium pink'></div>
     </div>
     <div>
-    ${main(state.comparisons.contents[state.comparisons.selected])}
+    ${main(comparisons)}
     ${toggles}
     </div>
     ${back()}
