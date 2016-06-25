@@ -54,7 +54,6 @@ module.exports = function (params, state, send) {
       cursor: 'pointer'
     })
     if (label === state.comparisons.selected) {
-      console.log('hey')
       css(toggle, {opacity: 0.9})
     } else {
       css(toggle, {opacity: 0.7})
