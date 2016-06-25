@@ -15,13 +15,17 @@ module.exports = function (params, state, send) {
 
   css(tocWrapper, {
     position: 'fixed',
-    left: 0,
-    fontSize: '80%',
+    right: '60%',
+    top: '0px',
+    fontSize: '100%',
     color: 'rgb(190, 190, 190)',
-    width: '24%',
+    width: '20%',
     overflowY: 'scroll',
     margin: '0px 0px 30px 0px',
-    height: tocHeight
+    height: tocHeight,
+    background: 'rgb(30,30,30)',
+    opacity: 0.7,
+    paddingLeft: '10px'
   })
 
   onload(tocWrapper, function () {
@@ -37,7 +41,7 @@ module.exports = function (params, state, send) {
   container.appendChild(contentWrapper)
 
   css(contentWrapper, {
-    width: '65%', 
+    width: '55%', 
     height: window.innerHeight - 60, 
     position: 'fixed',
     padding: '30px',
