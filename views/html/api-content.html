@@ -1,0 +1,2904 @@
+<h1 id="regl-api">REGL API</h1>
+
+<hr>
+<h2 id="initialization">Initialization</h2>
+<h5 id="as-a-fullscreen-canvas">As a fullscreen canvas</h5>
+<p>By default calling <code>module.exports</code> on the <code>regl</code> package creates a full screen canvas element and WebGLRenderingContext.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> regl = <span class="hljs-built_in">require</span>(<span class="hljs-string">'regl'</span>)([options])
+</code></pre>
+<h5 id="from-a-container-div">From a container div</h5>
+<p>Alternatively passing a container element as the first argument appends the generated canvas to its children.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> regl = <span class="hljs-built_in">require</span>(<span class="hljs-string">'regl'</span>)(element, [options])
+</code></pre>
+<h5 id="from-a-canvas">From a canvas</h5>
+<p>If the first argument is an HTMLCanvasElement, then <code>regl</code> will use this canvas to create a new WebGLRenderingContext that it renders into.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> regl = <span class="hljs-built_in">require</span>(<span class="hljs-string">'regl'</span>)(canvas, [options])
+</code></pre>
+<h5 id="from-a-webgl-context">From a WebGL context</h5>
+<p>Finally, if the first argument is a WebGLRenderingContext, then <code>regl</code> will just use this context without touching the DOM at all.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> regl = <span class="hljs-built_in">require</span>(<span class="hljs-string">'regl'</span>)(gl, [options])
+</code></pre>
+<p>Note that this form is compatible with <a href="https://github.com/stackgl/headless-gl"><code>headless-gl</code></a> and can be used to do offscreen rendering in node.js. For example,</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">//Creates a headless 256x256 regl instance</span>
+<span class="hljs-keyword">var</span> regl = <span class="hljs-built_in">require</span>(<span class="hljs-string">'regl'</span>)(<span class="hljs-built_in">require</span>(<span class="hljs-string">'gl'</span>)(<span class="hljs-number">256</span>, <span class="hljs-number">256</span>))
+</code></pre>
+<h3 id="initialization-options">Initialization options</h3>
+<p><strong>TODO</strong></p>
+<hr>
+<h2 id="commands">Commands</h2>
+<p><em>Draw commands</em> are the fundamental abstraction in <code>regl</code>.  A draw command wraps up all of the WebGL state associated with a draw call (either <code>drawArrays</code> or <code>drawElements</code>) and packages it into a single reusable function. For example, here is a command that draws a triangle,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> drawTriangle = regl({
+  frag: <span class="hljs-string">`
+  void main() {
+    gl_FragColor = vec4(1, 0, 0, 1);
+  }`</span>,
+
+  vert: <span class="hljs-string">`
+  attribute vec2 position;
+  void main() {
+    gl_Position = vec4(position, 0, 1);
+  }`</span>,
+
+  attributes: {
+    position: [[<span class="hljs-number">0</span>, <span class="hljs-number">-1</span>], [<span class="hljs-number">-1</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]]
+  },
+
+  count: <span class="hljs-number">3</span>
+})
+</code></pre>
+<p>To execute a command you call it just like you would any function,</p>
+<pre><code class="lang-javascript">drawTriangle()
+</code></pre>
+<hr>
+<h3 id="executing-commands">Executing commands</h3>
+<p>There are 3 ways to execute a command,</p>
+<h4 id="one-shot-rendering">One-shot rendering</h4>
+<p>In one shot rendering the command is executed once and immediately,</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Executes command immediately with no arguments</span>
+command()
+
+<span class="hljs-comment">// Executes a command using the specified arguments</span>
+command(props)
+</code></pre>
+<h4 id="batch-rendering">Batch rendering</h4>
+<p>A command can also be executed multiple times by passing a non-negative integer or an array as the first argument.  The <code>batchId</code> is initially <code>0</code> and incremented for each executed,</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Executes the command `count`-times</span>
+command(count)
+
+<span class="hljs-comment">// Executes the command once for each args</span>
+command([props0, props1, props2, ..., propsn])
+</code></pre>
+<h4 id="scoped-commands">Scoped commands</h4>
+<p>Commands can be nested using scoping.  If the argument to the command is a function then the command is evaluated and the state variables are saved as the defaults for all commands executed within its scope,</p>
+<pre><code class="lang-javascript">command(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
+  <span class="hljs-comment">// ... execute sub commands</span>
+})
+
+command(props, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
+  <span class="hljs-comment">// ... execute sub commands</span>
+})
+</code></pre>
+<hr>
+<h3 id="inputs">Inputs</h3>
+<p>Inputs to <code>regl</code> commands can come from one of three sources,</p>
+<ul>
+<li>Context: Context variables are not used directly in commands, but can be passed into</li>
+<li>Props: props are arguments which are passed into commands</li>
+<li><code>this</code>: <code>this</code> variables are indexed from the <code>this</code> variable that the command was called with</li>
+</ul>
+<p>If you are familiar with Facebook's <a href="https://github.com/facebook/react">react</a>, these are roughly analogous to a component's <a href="https://facebook.github.io/react/docs/context.html">context</a>, <a href="https://facebook.github.io/react/docs/transferring-props.html">props</a> and <a href="https://facebook.github.io/react/docs/component-api.html#setstate">state</a> variables respectively.</p>
+<h4 id="example">Example</h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> drawSpinningStretchyTriangle = regl({
+  frag: <span class="hljs-string">`
+  void main() {
+    gl_FragColor = vec4(1, 0, 0, 1);
+  }`</span>,
+
+  vert: <span class="hljs-string">`
+  attribute vec2 position;
+  uniform float angle, scale, width, height;
+  void main() {
+    float aspect = width / height;
+    gl_Position = vec4(
+      scale * (cos(angle) * position.x - sin(angle) * position.y),
+      aspect * scale * (sin(angle) * position.x + cos(angle) * position.y),
+      0,
+      1.0);
+  }`</span>,
+
+  attributes: {
+    position: [[<span class="hljs-number">0</span>, <span class="hljs-number">-1</span>], [<span class="hljs-number">-1</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]]
+  },
+
+  uniforms: {
+    <span class="hljs-comment">//</span>
+    <span class="hljs-comment">// Dynamic properties can be functions.  Each function gets passed:</span>
+    <span class="hljs-comment">//</span>
+    <span class="hljs-comment">//  * context: which contains data about the current regl environment</span>
+    <span class="hljs-comment">//  * props: which are user specified arguments</span>
+    <span class="hljs-comment">//  * batchId: which is the index of the draw command in the batch</span>
+    <span class="hljs-comment">//</span>
+    angle: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context, props, batchId</span>) </span>{
+      <span class="hljs-keyword">return</span> args.speed * stats.count + <span class="hljs-number">0.01</span> * batchId
+    },
+
+    <span class="hljs-comment">// As a shortcut/optimization we can also just read out a property</span>
+    <span class="hljs-comment">// from the args.  For example, this</span>
+    <span class="hljs-comment">//</span>
+    scale: regl.prop(<span class="hljs-string">'scale'</span>),
+    <span class="hljs-comment">//</span>
+    <span class="hljs-comment">// is semantically equivalent to</span>
+    <span class="hljs-comment">//</span>
+    <span class="hljs-comment">//  scale: function (context, props) {</span>
+    <span class="hljs-comment">//    return props.scale</span>
+    <span class="hljs-comment">//  }</span>
+    <span class="hljs-comment">//</span>
+
+    <span class="hljs-comment">// Similarly there are shortcuts for accessing context variables</span>
+    width: regl.context(<span class="hljs-string">'viewportWidth'</span>),
+    height: regl.context(<span class="hljs-string">'viewportHeight'</span>),
+    <span class="hljs-comment">//</span>
+    <span class="hljs-comment">// which is the same as writing:</span>
+    <span class="hljs-comment">//</span>
+    <span class="hljs-comment">// width: function (context) {</span>
+    <span class="hljs-comment">//    return context.viewportWidth</span>
+    <span class="hljs-comment">// }</span>
+    <span class="hljs-comment">//</span>
+  },
+
+  count: <span class="hljs-number">3</span>
+})
+</code></pre>
+<p>To execute a draw command with dynamic arguments we pass it a configuration object as the first argument,</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Draws one spinning triangle</span>
+drawSpinningStretchyTriangle({
+  scale: <span class="hljs-number">0.5</span>,
+  speed: <span class="hljs-number">2</span>
+})
+
+<span class="hljs-comment">// Draws multiple spinning triangles</span>
+drawSpinningStretchyTriangle([
+  { <span class="hljs-comment">// batchId 0</span>
+    scale: <span class="hljs-number">1</span>,
+    speed: <span class="hljs-number">1</span>,
+  },
+  { <span class="hljs-comment">// batchId 1</span>
+    scale: <span class="hljs-number">2</span>,
+    speed: <span class="hljs-number">0.1</span>,
+  },
+  { <span class="hljs-comment">// batchId 2</span>
+    scale: <span class="hljs-number">0.25</span>,
+    speed: <span class="hljs-number">3</span>
+  }
+])
+</code></pre>
+<h4 id="context">Context</h4>
+<p>Context variables in <code>regl</code> are computed before any other parameters and can also be passed from a scoped command to any sub-commands.  <code>regl</code> defines the following default context variables:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frameCount</code></td>
+<td>The number of frames rendered</td>
+</tr>
+<tr>
+<td><code>deltaTime</code></td>
+<td>Time since the last frame was rendered in seconds</td>
+</tr>
+<tr>
+<td><code>time</code></td>
+<td>Total time elapsed since the regl was initialized in seconds</td>
+</tr>
+<tr>
+<td><code>viewportWidth</code></td>
+<td>Width of the current viewport in pixels</td>
+</tr>
+<tr>
+<td><code>viewportHeight</code></td>
+<td>Height of the current viewport in pixels</td>
+</tr>
+<tr>
+<td><code>framebufferWidth</code></td>
+<td>Width of the current framebuffer in pixels</td>
+</tr>
+<tr>
+<td><code>framebufferHeight</code></td>
+<td>Height of the current framebuffer in pixels</td>
+</tr>
+<tr>
+<td><code>drawingBufferWidth</code></td>
+<td>Width of the WebGL context drawing buffer</td>
+</tr>
+<tr>
+<td><code>drawingBufferHeight</code></td>
+<td>Height of the WebGL context drawing buffer</td>
+</tr>
+<tr>
+<td><code>pixelRatio</code></td>
+<td>The pixel ratio of the drawing buffer</td>
+</tr>
+</tbody>
+</table>
+<p>You can define context variables in the <code>context</code> block of a command.  For example, here is how you can use context variables to set up a camera:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// This scoped command sets up the camera parameters</span>
+<span class="hljs-keyword">var</span> setupCamera = regl({
+  context: {
+    projection: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
+      <span class="hljs-keyword">return</span> mat4.perspective([],
+        <span class="hljs-built_in">Math</span>.PI / <span class="hljs-number">4</span>,
+        context.viewportWidth / context.viewportHeight,
+        <span class="hljs-number">0.01</span>,
+        <span class="hljs-number">1000.0</span>)
+    },
+
+    view: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context, props</span>) </span>{
+      <span class="hljs-keyword">return</span> mat4.lookAt([],
+        props.eye,
+        props.target,
+        [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>])
+    },
+
+    eye: regl.props(<span class="hljs-string">'eye'</span>)
+  },
+
+  uniforms: {
+    view: regl.context(<span class="hljs-string">'view'</span>),
+    invView: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
+      <span class="hljs-keyword">return</span> mat4.inverse([], context.view)
+    },
+    projection: regl.context(<span class="hljs-string">'projection'</span>)
+  }
+})
+
+<span class="hljs-comment">// ... do stuff</span>
+
+<span class="hljs-comment">// In the render function:</span>
+setupCamera({
+  eye: [<span class="hljs-number">10</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+  target: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
+}, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+
+  <span class="hljs-comment">// draw stuff</span>
+})
+</code></pre>
+<h4 id="props">Props</h4>
+<p>The most common way to pass data into regl is via props.  The props for a render command are declared</p>
+<h4 id="-this-"><code>this</code></h4>
+<p>While <code>regl</code> strives to provide a stateless API, there are a few cases where it can be useful to cache state locally to a specific command.  One way to achieve this is to use objects.  When a regl command is executed as a member function of an object, the <code>this</code> parameter is set to the object on which it was called and is passed to all computed parameters. For example, this shows how to use regl to create a simple reusable mesh object,</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// First we create a constructor</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Mesh</span> (<span class="hljs-params">center, {positions, cells}</span>) </span>{
+  <span class="hljs-keyword">this</span>.center = center
+  <span class="hljs-keyword">this</span>.positions = regl.buffer(positions)
+  <span class="hljs-keyword">this</span>.cells = regl.buffer(cells)
+}
+
+<span class="hljs-comment">// Then we assign regl commands directly to the prototype of the class</span>
+Mesh.prototype.draw = regl({
+  vert: <span class="hljs-string">`
+  uniform mat4 projection, view, model;
+  attribute vec3 position;
+  void main () {
+    gl_Position = projection * view * model * vec4(position, 1);
+  }`</span>,
+
+  frag: <span class="hljs-string">`
+  void main () {
+    gl_FragColor = vec4(1, 0, 0, 1);
+  }`</span>,
+
+  uniforms: {
+    <span class="hljs-comment">// dynamic properties are invoked with the same `this` as the command</span>
+    model: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) =&gt; </span>{
+      <span class="hljs-keyword">var</span> c = <span class="hljs-keyword">this</span>.center
+      <span class="hljs-keyword">return</span> [
+        <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,
+        <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,
+        <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>,
+        -c[<span class="hljs-number">0</span>], -c[<span class="hljs-number">1</span>], -c[<span class="hljs-number">2</span>], <span class="hljs-number">1</span>
+      ]
+    },
+
+    view: regl.prop(<span class="hljs-string">'view'</span>),
+    projection: regl.prop(<span class="hljs-string">'projection'</span>)
+  }
+
+  attributes: {
+    <span class="hljs-comment">// here we are using 'positions' proeprty of the mesh</span>
+    position: regl.this(<span class="hljs-string">'positions'</span>)
+  },
+
+  <span class="hljs-comment">// and same for the cells</span>
+  elements: regl.this(<span class="hljs-string">'cells'</span>)
+})
+</code></pre>
+<p>Once defined, we could then use these mesh objects as follows:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Initialize meshes</span>
+<span class="hljs-keyword">var</span> bunnyMesh = <span class="hljs-keyword">new</span> Mesh([<span class="hljs-number">5</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>], <span class="hljs-built_in">require</span>(<span class="hljs-string">'bunny'</span>))
+<span class="hljs-keyword">var</span> teapotMesh = <span class="hljs-keyword">new</span> Mesh([<span class="hljs-number">0</span>, <span class="hljs-number">-3</span>, <span class="hljs-number">0</span>], <span class="hljs-built_in">require</span>(<span class="hljs-string">'teapot'</span>))
+
+<span class="hljs-comment">// ... set up rest of scene, compute matrices etc.</span>
+<span class="hljs-keyword">var</span> view, projection
+
+<span class="hljs-comment">// Now draw meshes:</span>
+bunnyMesh.draw({
+  view: view,
+  projection: projection
+})
+
+teapotMesh.draw({
+  view: view,
+  projection: projection
+})
+</code></pre>
+<hr>
+<h3 id="parameters">Parameters</h3>
+<p>The input to a command declaration is a complete description of the WebGL state machine in the form of an object.  The properties of this object are parameters which specify how values in the WebGL state machine are to be computed.</p>
+<hr>
+<h4 id="shaders">Shaders</h4>
+<p>Each draw command can specify the source code for a vertex and/or fragment shader,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  vert: <span class="hljs-string">`
+  void main() {
+    gl_Position = vec4(0, 0, 0, 1);
+  }`</span>,
+
+  frag: <span class="hljs-string">`
+  void main() {
+    gl_FragColor = vec4(1, 0, 1, 1);
+  }`</span>,
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vert</code></td>
+<td>Source code of vertex shader</td>
+</tr>
+<tr>
+<td><code>frag</code></td>
+<td>Source code of fragment shader</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateShader.xml"><code>gl.createShader</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glShaderSource.xml"><code>gl.shaderSource</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompileShader.xml"><code>gl.compileShader</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateProgram.xml"><code>gl.createProgram</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glAttachShader.xml"><code>gl.attachShader</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glLinkProgram.xml"><code>gl.linkProgram</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUseProgram.xml"><code>gl.useProgram</code></a></li>
+</ul>
+<hr>
+<h4 id="uniforms">Uniforms</h4>
+<p>Uniform variables are specified in the <code>uniforms</code> block of the command.  For example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  vert: <span class="hljs-string">`
+  struct SomeStruct {
+    float value;
+  };
+
+  uniform vec4 someUniform;
+  uniform int anotherUniform;
+  uniform SomeStruct nested;
+
+  void main() {
+    gl_Position = vec4(1, 0, 0, 1);
+  }`</span>,
+
+  uniforms: {
+    someUniform: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+    anotherUniform: regl.prop(<span class="hljs-string">'myProp'</span>),
+    <span class="hljs-string">'nested.value'</span>, <span class="hljs-number">5.3</span>
+  },
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<p><strong>Notes</strong></p>
+<ul>
+<li>To specify uniforms in nested structs use the fully qualified path with dot notation</li>
+<li>Matrix uniforms are specified as flat length n^2 arrays without transposing</li>
+</ul>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetUniformLocation.xml"><code>gl.getUniformLocation</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml"><code>gl.uniform</code></a></li>
+</ul>
+<hr>
+<h4 id="attributes">Attributes</h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  attributes: {
+    <span class="hljs-comment">// Attributes can be declared explicitly</span>
+    normals: {
+      buffer: regl.buffer([
+        <span class="hljs-comment">// ...</span>
+      ]),
+      offset: <span class="hljs-number">0</span>,
+      stride: <span class="hljs-number">12</span>,
+      normalized: <span class="hljs-literal">false</span>,
+
+      <span class="hljs-comment">// divisor is only used if instancing is enabled</span>
+      divisor: <span class="hljs-number">0</span>
+    },
+
+    <span class="hljs-comment">// A regl.buffer or the arguments to regl.buffer may also be specified</span>
+    position: [
+      <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>,
+      <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>,
+      ...
+    ],
+
+    <span class="hljs-comment">// Finally, attributes may be initialized with a constant value</span>
+    color: {
+      constant: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]
+    }
+  },
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<p>Each attribute can have any of the following optional properties,</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>buffer</code></td>
+<td>A <code>REGLBuffer</code> wrapping the buffer object</td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>The offset of the <code>vertexAttribPointer</code> in bytes</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>stride</code></td>
+<td>The stride of the <code>vertexAttribPointer</code> in bytes</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>normalized</code></td>
+<td>Whether the pointer is normalized</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>The size of the vertex attribute</td>
+<td>Inferred from shader</td>
+</tr>
+<tr>
+<td><code>divisor</code></td>
+<td>Sets <code>gl.vertexAttribDivisorANGLE</code></td>
+<td><code>0</code> *</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Attribute size is inferred from the shader vertex attribute if not specified</li>
+<li>If a buffer is passed for an attribute then all pointer info is inferred</li>
+<li>If the arguments to <code>regl.buffer</code> are passed, then a buffer is constructed</li>
+<li>If an array is passed to an attribute, then the vertex attribute is set to a constant</li>
+<li><code>divisor</code> is only supported if the <code>ANGLE_instanced_arrays</code> extension is available</li>
+</ul>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml"><code>gl.vertexAttribPointer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttrib.xml"><code>gl.vertexAttrib</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetAttribLocation.xml"><code>gl.getAttribLocation</code></a></li>
+<li><a href="https://www.opengl.org/sdk/docs/man4/html/glVertexAttribDivisor.xhtml"><code>gl.vertexAttibDivisor</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDisableVertexAttribArray.xml"><code>gl.enableVertexAttribArray</code>, <code>gl.disableVertexAttribArray</code></a></li>
+</ul>
+<hr>
+<h4 id="drawing">Drawing</h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  primitive: <span class="hljs-string">'triangles'</span>,
+  offset: <span class="hljs-number">0</span>,
+  count: <span class="hljs-number">6</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>primitive</code></td>
+<td>Sets the primitive type</td>
+<td><code>'triangles'</code> *</td>
+</tr>
+<tr>
+<td><code>count</code></td>
+<td>Number of vertices to draw</td>
+<td><code>0</code> *</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>Offset of primitives to draw</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>instances</code></td>
+<td>Number of instances to render</td>
+<td><code>0</code> **</td>
+</tr>
+<tr>
+<td><code>elements</code></td>
+<td>Element array buffer</td>
+<td><code>null</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li>If <code>elements</code> is specified while <code>primitive</code>, <code>count</code> and <code>offset</code> are not, then these values may be inferred from the state of the element array buffer.</li>
+<li><code>elements</code> must be either an instance of <code>regl.elements</code> or else the arguments to <code>regl.elements</code></li>
+<li><code>instances</code> is only applicable if the <code>ANGLE_instanced_arrays</code> extension is present.</li>
+<li><code>primitive</code> can take on the following values</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Primitive type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'points'</code></td>
+<td><code>gl.POINTS</code></td>
+</tr>
+<tr>
+<td><code>'lines'</code></td>
+<td>gl.LINES`</td>
+</tr>
+<tr>
+<td><code>'line strip'</code></td>
+<td><code>gl.LINE_STRIP</code></td>
+</tr>
+<tr>
+<td><code>'line loop</code></td>
+<td><code>gl.LINE_LOOP</code></td>
+</tr>
+<tr>
+<td><code>'triangles</code></td>
+<td><code>gl.TRIANGLES</code></td>
+</tr>
+<tr>
+<td><code>'triangle strip'</code></td>
+<td><code>gl.TRIANGLE_STRIP</code></td>
+</tr>
+<tr>
+<td><code>'triangle fan'</code></td>
+<td><code>gl.TRIANGLE_FAN</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDrawArrays.xml"><code>gl.drawArrays</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDrawElements.xml"><code>gl.drawElements</code></a></li>
+<li><a href="https://www.opengl.org/sdk/docs/man4/html/glDrawArraysInstanced.xhtml"><code>gl.drawArraysInstancedANGLE</code></a></li>
+<li><a href="https://www.opengl.org/sdk/docs/man4/html/glDrawElementsInstanced.xhtml"><code>gl.drawElementsInstancedANGLE</code></a></li>
+</ul>
+<hr>
+<h4 id="render-target">Render target</h4>
+<p>A <code>regl.framebuffer</code> object may also be specified to allow for rendering to offscreen locations.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  framebuffer: fbo
+})
+</code></pre>
+<p><strong>Notes</strong></p>
+<ul>
+<li><code>framebuffer</code> must be a <code>regl.framebuffer</code> object</li>
+<li>Passing <code>null</code> sets the framebuffer to the drawing buffer</li>
+<li>Updating the render target will modify the viewport</li>
+</ul>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.opengl.org/sdk/docs/man4/html/glBindFramebuffer.xhtml"><code>gl.bindFramebuffer</code></a></li>
+</ul>
+<hr>
+<h4 id="depth-buffer">Depth buffer</h4>
+<p>All state relating to the depth buffer is stored in the <code>depth</code> field of the command.  For example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  depth: {
+    enable: <span class="hljs-literal">true</span>,
+    mask: <span class="hljs-literal">true</span>,
+    func: <span class="hljs-string">'less'</span>,
+    range: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+  },
+
+  <span class="hljs-comment">// ..</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>Toggles <code>gl.enable(gl.DEPTH_TEST)</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>mask</code></td>
+<td>Sets <code>gl.depthMask</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>range</code></td>
+<td>Sets <code>gl.depthRange</code></td>
+<td><code>[0, 1]</code></td>
+</tr>
+<tr>
+<td><code>func</code></td>
+<td>Sets <code>gl.depthFunc</code>. See table below for possible values</td>
+<td><code>'less'</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li><code>depth.func</code> can take on the possible values</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'never'</code></td>
+<td><code>gl.NEVER</code></td>
+</tr>
+<tr>
+<td><code>'always'</code></td>
+<td><code>gl.ALWAYS</code></td>
+</tr>
+<tr>
+<td><code>'&lt;', 'less'</code></td>
+<td><code>gl.LESS</code></td>
+</tr>
+<tr>
+<td><code>'&lt;=', 'lequal'</code></td>
+<td><code>gl.LEQUAL</code></td>
+</tr>
+<tr>
+<td><code>'&gt;', 'greater'</code></td>
+<td><code>gl.GREATER</code></td>
+</tr>
+<tr>
+<td><code>'&gt;=', 'gequal'</code></td>
+<td><code>gl.GEQUAL</code></td>
+</tr>
+<tr>
+<td><code>'=', 'equal'</code></td>
+<td><code>gl.EQUAL</code></td>
+</tr>
+<tr>
+<td><code>'!=', 'notequal'</code></td>
+<td><code>gl.NOTEQUAL</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDepthFunc.xml"><code>gl.depthFunc</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDepthMask.xml"><code>gl.depthMask</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDepthRangef.xml"><code>gl.depthRange</code></a></li>
+</ul>
+<hr>
+<h4 id="blending">Blending</h4>
+<p>Blending information is stored in the <code>blend</code> field,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  blend: {
+    enable: <span class="hljs-literal">true</span>,
+    func: {
+      srcRGB: <span class="hljs-string">'src alpha'</span>,
+      srcAlpha: <span class="hljs-number">1</span>,
+      dstRGB: <span class="hljs-string">'one minus src alpha'</span>,
+      dstAlpha: <span class="hljs-number">1</span>
+    },
+    equation: {
+      rgb: <span class="hljs-string">'add'</span>,
+      alpha: <span class="hljs-string">'add'</span>
+    },
+    color: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
+  },
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>Toggles <code>gl.enable(gl.BLEND)</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>equation</code></td>
+<td>Sets <code>gl.blendEquation</code> (see table)</td>
+<td><code>'add'</code></td>
+</tr>
+<tr>
+<td><code>func</code></td>
+<td>Sets <code>gl.blendFunc</code> (see table)</td>
+<td><code>{src:'src alpha',dst:'one minus src alpha'}</code></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>Sets <code>gl.blendColor</code></td>
+<td><code>[0, 0, 0, 0]</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li><code>equation</code> can be either a string or an object with the fields <code>{rgb, alpha}</code>.  The former corresponds to <code>gl.blendEquation</code> and the latter to <code>gl.blendEquationSeparate</code></li>
+<li>The fields of <code>equation</code> can take on the following values</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Equation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'add'</code></td>
+<td><code>gl.FUNC_ADD</code></td>
+</tr>
+<tr>
+<td><code>'subtract'</code></td>
+<td><code>gl.FUNC_SUBTRACT</code></td>
+</tr>
+<tr>
+<td><code>'reverse subtract'</code></td>
+<td><code>gl.FUNC_REVERSE_SUBTRACT</code></td>
+</tr>
+<tr>
+<td><code>'min'</code></td>
+<td><code>gl.MIN_EXT</code></td>
+</tr>
+<tr>
+<td><code>'max'</code></td>
+<td><code>gl.MAX_EXT</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>'min'</code> and <code>'max'</code> are only available if the <code>EXT_blend_minmax</code> extension is supported</li>
+<li><code>func</code> can be an object with the fields <code>{src, dst}</code> or <code>{srcRGB, srcAlpha, dstRGB, dstAlpha}</code>, with the former corresponding to <code>gl.blendFunc</code> and the latter to <code>gl.blendFuncSeparate</code></li>
+<li>The fields of <code>func</code> can take on the following values</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Func</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0, 'zero'</code></td>
+<td><code>gl.ZERO</code></td>
+</tr>
+<tr>
+<td><code>1, 'one'</code></td>
+<td><code>gl.ONE</code></td>
+</tr>
+<tr>
+<td><code>'src color'</code></td>
+<td><code>gl.SRC_COLOR</code></td>
+</tr>
+<tr>
+<td><code>'one minus src color'</code></td>
+<td><code>gl.ONE_MINUS_SRC_COLOR</code></td>
+</tr>
+<tr>
+<td><code>'src alpha'</code></td>
+<td><code>gl.SRC_ALPHA</code></td>
+</tr>
+<tr>
+<td><code>'one minus src alpha'</code></td>
+<td><code>gl.ONE_MINUS_SRC_ALPHA</code></td>
+</tr>
+<tr>
+<td><code>'dst color'</code></td>
+<td><code>gl.DST_COLOR</code></td>
+</tr>
+<tr>
+<td><code>'one minus dst color'</code></td>
+<td><code>gl.ONE_MINUS_DST_COLOR</code></td>
+</tr>
+<tr>
+<td><code>'dst alpha'</code></td>
+<td><code>gl.DST_ALPHA</code></td>
+</tr>
+<tr>
+<td><code>'one minus dst alpha'</code></td>
+<td><code>gl.ONE_MINUS_DST_ALPHA</code></td>
+</tr>
+<tr>
+<td><code>'constant color'</code></td>
+<td><code>gl.CONSTANT_COLOR</code></td>
+</tr>
+<tr>
+<td><code>'one minus constant color'</code></td>
+<td><code>gl.ONE_MINUS_CONSTANT_COLOR</code></td>
+</tr>
+<tr>
+<td><code>'constant alpha'</code></td>
+<td><code>gl.CONSTANT_ALPHA</code></td>
+</tr>
+<tr>
+<td><code>'one minus constant alpha'</code></td>
+<td><code>gl.ONE_MINUS_CONSTANT_ALPHA</code></td>
+</tr>
+<tr>
+<td><code>'src alpha saturate'</code></td>
+<td><code>gl.SRC_ALPHA_SATURATE</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBlendEquationSeparate.xml"><code>gl.blendEquationSeparate</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBlendFuncSeparate.xml"><code>gl.blendFuncSeparate</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBlendColor.xml"><code>gl.blendColor</code></a></li>
+</ul>
+<hr>
+<h4 id="stencil">Stencil</h4>
+<p>Example:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  stencil: {
+    enable: <span class="hljs-literal">true</span>,
+    mask: <span class="hljs-number">0xff</span>,
+    func: {
+      cmp: <span class="hljs-string">'&lt;'</span>,
+      ref: <span class="hljs-number">0</span>,
+      mask: <span class="hljs-number">0xff</span>
+    },
+    opFront: {
+      fail: <span class="hljs-string">'keep'</span>,
+      zfail: <span class="hljs-string">'keep'</span>,
+      pass: <span class="hljs-string">'keep'</span>
+    },
+    opBack: {
+      fail: <span class="hljs-string">'keep'</span>,
+      zfail: <span class="hljs-string">'keep'</span>,
+      pass: <span class="hljs-string">'keep'</span>
+    }
+  },
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>Toggles <code>gl.enable(gl.STENCIL_TEST)</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>mask</code></td>
+<td>Sets <code>gl.stencilMask</code></td>
+<td><code>-1</code></td>
+</tr>
+<tr>
+<td><code>func</code></td>
+<td>Sets <code>gl.stencilFunc</code></td>
+<td><code>{cmp:'always',ref:0,mask:-1}</code></td>
+</tr>
+<tr>
+<td><code>opFront</code></td>
+<td>Sets <code>gl.stencilOpSeparate</code> for front face</td>
+<td><code>{fail:'keep',zfail:'keep',pass:'keep'}</code></td>
+</tr>
+<tr>
+<td><code>opBack</code></td>
+<td>Sets <code>gl.stencilOpSeparate</code> for back face</td>
+<td><code>{fail:'keep',zfail:'keep',pass:'keep'}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li><code>func</code> is an object which configures the stencil test function. It has 3 properties,<ul>
+<li><code>cmp</code> which is the comparison function</li>
+<li><code>ref</code> which is the reference value</li>
+<li><code>mask</code> which is the comparison mask</li>
+</ul>
+</li>
+<li><code>func.cmp</code> is a comparison operator which takes one of the following values,</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'never'</code></td>
+<td><code>gl.NEVER</code></td>
+</tr>
+<tr>
+<td><code>'always'</code></td>
+<td><code>gl.ALWAYS</code></td>
+</tr>
+<tr>
+<td><code>'&lt;', 'less'</code></td>
+<td><code>gl.LESS</code></td>
+</tr>
+<tr>
+<td><code>'&lt;=', 'lequal'</code></td>
+<td><code>gl.LEQUAL</code></td>
+</tr>
+<tr>
+<td><code>'&gt;', 'greater'</code></td>
+<td><code>gl.GREATER</code></td>
+</tr>
+<tr>
+<td><code>'&gt;=', 'gequal'</code></td>
+<td><code>gl.GEQUAL</code></td>
+</tr>
+<tr>
+<td><code>'=', 'equal'</code></td>
+<td><code>gl.EQUAL</code></td>
+</tr>
+<tr>
+<td><code>'!=', 'notequal'</code></td>
+<td><code>gl.NOTEQUAL</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>opFront</code> and <code>opBack</code> specify the stencil op.  Each is an object which takes the following parameters:<ul>
+<li><code>fail</code>, the stencil op which is applied when the stencil test fails</li>
+<li><code>zfail</code>, the stencil op which is applied when the stencil test passes and the depth test fails</li>
+<li><code>pass</code>, the stencil op which is applied when both stencil and depth tests pass</li>
+</ul>
+</li>
+<li>Values for <code>opFront.fail</code>, <code>opFront.zfail</code>, etc. can come from the following table</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Stencil Op</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'zero'</code></td>
+<td><code>gl.ZERO</code></td>
+</tr>
+<tr>
+<td><code>'keep'</code></td>
+<td><code>gl.KEEP</code></td>
+</tr>
+<tr>
+<td><code>'replace'</code></td>
+<td><code>gl.REPLACE</code></td>
+</tr>
+<tr>
+<td><code>'invert'</code></td>
+<td><code>gl.INVERT</code></td>
+</tr>
+<tr>
+<td><code>'increment'</code></td>
+<td><code>gl.INCR</code></td>
+</tr>
+<tr>
+<td><code>'decrement'</code></td>
+<td><code>gl.DECR</code></td>
+</tr>
+<tr>
+<td><code>'increment wrap'</code></td>
+<td><code>gl.INCR_WRAP</code></td>
+</tr>
+<tr>
+<td><code>'decrement wrap'</code></td>
+<td><code>gl.DECR_WRAP</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glStencilFunc.xml"><code>gl.stencilFunc</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glStencilMask.xml"><code>gl.stencilMask</code></a></li>
+<li><a href="http://www.khronos.org/opengles/sdk/2.0/docs/man/xhtml/glStencilOpSeparate.xml"><code>gl.stencilOpSeparate</code></a></li>
+</ul>
+<hr>
+<h4 id="polygon-offset">Polygon offset</h4>
+<p>Polygon offsetting behavior can be controlled using the <code>polygonOffset</code> field,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  polygonOffset: {
+    enable: <span class="hljs-literal">true</span>,
+    offset: {
+      factor: <span class="hljs-number">1</span>,
+      units: <span class="hljs-number">0</span>
+    }
+  }
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>Toggles <code>gl.enable(gl.POLYGON_OFFSET_FILL)</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>Sets <code>gl.polygonOffset</code></td>
+<td><code>{factor:0, units:0}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Related WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glPolygonOffset.xml"><code>gl.polygonOffset</code></a></li>
+</ul>
+<hr>
+<h4 id="culling">Culling</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  cull: {
+    enable: <span class="hljs-literal">true</span>,
+    face: <span class="hljs-string">'back'</span>
+  },
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>Toggles <code>gl.enable(gl.CULL_FACE)</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>face</code></td>
+<td>Sets <code>gl.cullFace</code></td>
+<td><code>'back'</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li><code>face</code> must be one of the following values,</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Face</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'front'</code></td>
+<td><code>gl.FRONT</code></td>
+</tr>
+<tr>
+<td><code>'back'</code></td>
+<td><code>gl.BACK</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCullFace.xml"><code>gl.cullFace</code></a></li>
+</ul>
+<hr>
+<h4 id="front-face">Front face</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  frontFace: <span class="hljs-string">'cw'</span>,
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontFace</code></td>
+<td>Sets <code>gl.frontFace</code></td>
+<td><code>'ccw'</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li>The value for front face must be one of the following,</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Orientation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'cw'</code></td>
+<td><code>gl.CW</code></td>
+</tr>
+<tr>
+<td><code>'ccw'</code></td>
+<td><code>gl.CCW</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glFrontFace.xml"><code>gl.frontFace</code></a></li>
+</ul>
+<hr>
+<h4 id="dithering">Dithering</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  dither: <span class="hljs-literal">true</span>,
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dither</code></td>
+<td>Toggles <code>gl.DITHER</code></td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h4 id="line-width">Line width</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  lineWidth: <span class="hljs-number">4</span>,
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lineWidth</code></td>
+<td>Sets <code>gl.lineWidth</code></td>
+<td><code>1</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glLineWidth.xml"><code>gl.lineWidth</code></a></li>
+</ul>
+<hr>
+<h4 id="color-mask">Color mask</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  colorMask: [<span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>, <span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>],
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>colorMask</code></td>
+<td>Sets <code>gl.colorMask</code></td>
+<td><code>[true, true, true, true]</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glColorMask.xml"><code>gl.colorMask</code></a></li>
+</ul>
+<hr>
+<h4 id="sample-coverage">Sample coverage</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  sample: {
+    enable: <span class="hljs-literal">true</span>,
+    alpha: <span class="hljs-literal">false</span>,
+    coverage: {
+      value: <span class="hljs-number">1</span>,
+      invert: <span class="hljs-literal">false</span>
+    }
+  },
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>Toggles <code>gl.enable(gl.SAMPLE_COVERAGE)</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>alpha</code></td>
+<td>Toggles <code>gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE)</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>coverage</code></td>
+<td>Sets <code>gl.sampleCoverage</code></td>
+<td><code>{value:1,invert:false}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glColorMask.xml"><code>gl.sampleCoverage</code></a></li>
+</ul>
+<hr>
+<h4 id="scissor">Scissor</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  scissor: {
+    enable: <span class="hljs-literal">true</span>,
+    box: {
+      x: <span class="hljs-number">10</span>,
+      y: <span class="hljs-number">20</span>,
+      w: <span class="hljs-number">100</span>,
+      h: <span class="hljs-number">100</span>
+    }
+  }
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable</code></td>
+<td>Toggles <code>gl.enable(gl.SCISSOR)</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>box</code></td>
+<td>Sets <code>gl.scissor</code></td>
+<td><code>{x:0,y:0}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li><code>box</code> is the shape of the scissor region, it takes the following parameters<ul>
+<li><code>x</code> is the left coordinate of the box, default <code>0</code></li>
+<li><code>y</code> is the top coordiante of the box, default <code>0</code></li>
+<li><code>w</code> is the width of the box, default fbo width - <code>x</code></li>
+<li><code>h</code> is the height of the box, default fbo height - <code>y</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glScissor.xml"><code>gl.scissor</code></a></li>
+</ul>
+<hr>
+<h4 id="viewport">Viewport</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
+  <span class="hljs-comment">// ...</span>
+
+  viewport: {
+    x: <span class="hljs-number">5</span>,
+    y: <span class="hljs-number">10</span>,
+    w: <span class="hljs-number">100</span>,
+    h: <span class="hljs-number">50</span>
+  }
+
+  <span class="hljs-comment">// ...</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>viewport</code></td>
+<td>The shape of viewport</td>
+<td><code>{}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Like <code>scissor.box</code>, <code>viewport</code> is a bounding box with properties <code>x,y,w,h</code></li>
+<li>Updating <code>viewport</code> will modify the context variables <code>viewportWidth</code> and <code>viewportHeight</code></li>
+</ul>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glViewport.xml"><code>gl.viewport</code></a></li>
+</ul>
+<hr>
+<h2 id="resources">Resources</h2>
+<p>Besides commands, the other major component of regl are resources.  Resources are GPU resident objects which are managed explicitly by the programmer.  Each resource follows a the same life cycle of create/read/update/delete.</p>
+<hr>
+<h3 id="buffers">Buffers</h3>
+<p><code>regl.buffer</code> wraps WebGL array buffer objects.</p>
+<h4 id="constructor">Constructor</h4>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Creates an empty length 100 buffer</span>
+<span class="hljs-keyword">var</span> zeroBuffer = regl.buffer(<span class="hljs-number">100</span>)
+
+<span class="hljs-comment">// A buffer with float data</span>
+<span class="hljs-keyword">var</span> floatBuffer = regl.buffer(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Float32Array</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>]))
+
+<span class="hljs-comment">// A streaming buffer of bytes</span>
+<span class="hljs-keyword">var</span> streamBuffer = regl.buffer({
+  usage: <span class="hljs-string">'stream'</span>,
+  data: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>([<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>, <span class="hljs-number">10</span>])
+})
+
+<span class="hljs-comment">// An unpacked buffer of position data</span>
+<span class="hljs-keyword">var</span> positionBuffer = regl.buffer([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">-2</span>]
+])
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>The data for the vertex buffer (see below)</td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>length</code></td>
+<td>If <code>data</code> is <code>null</code> or not present reserves space for the buffer</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>usage</code></td>
+<td>Sets array buffer usage hint</td>
+<td><code>'static'</code></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Usage Hint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'static'</code></td>
+<td><code>gl.DRAW_STATIC</code></td>
+</tr>
+<tr>
+<td><code>'dynamic'</code></td>
+<td><code>gl.DYNAMIC_DRAW</code></td>
+</tr>
+<tr>
+<td><code>'stream'</code></td>
+<td><code>gl.STREAM_DRAW</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateBuffer.xml"><code>gl.createBuffer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml"><code>gl.bufferData</code></a></li>
+</ul>
+<h4 id="update">Update</h4>
+<p>To reinitialize a buffer in place, we can call the buffer as a function:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// First we create a buffer</span>
+<span class="hljs-keyword">var</span> myBuffer = regl.buffer(<span class="hljs-number">5</span>)
+
+<span class="hljs-comment">// ... do stuff ...</span>
+
+<span class="hljs-comment">// Now reinitialize myBuffer</span>
+myBuffer({
+  data: [
+    <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>
+  ]
+})
+</code></pre>
+<p>The arguments to the update pathway are the same as the constructor and the returned value will be a reference to the buffer.  </p>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml"><code>gl.bufferData</code></a></li>
+</ul>
+<h5 id="in-place-update">In place update</h5>
+<p>For performance reasons we may sometimes want to update just a portion of
+We can also update a portion of the buffer using the <code>subdata</code> method.  This can be useful if you are dealing with frequently changing or streaming vertex data.  Here is an example:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// First we preallocate a buffer with 100 bytes of data</span>
+<span class="hljs-keyword">var</span> myBuffer = regl.buffer({
+  usage: <span class="hljs-string">'dynamic'</span>,  <span class="hljs-comment">// give the WebGL driver a hint that this buffer may change</span>
+  type: <span class="hljs-string">'float'</span>,
+  length: <span class="hljs-number">100</span>
+})
+
+<span class="hljs-comment">// Now we initialize the head of the buffer with the following data</span>
+myBuffer.subdata([ <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span> ])
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// untyped arrays and arrays-of-arrays are converted to the same data type as</span>
+<span class="hljs-comment">// the buffer.  typedarrays are copied bit-for-bit into the buffer</span>
+<span class="hljs-comment">// with no type conversion.</span>
+<span class="hljs-comment">//</span>
+
+<span class="hljs-comment">// We can also update the buffer at some byte offset by passing this as</span>
+<span class="hljs-comment">// the second argument to subdata</span>
+myBuffer.subdata([[<span class="hljs-number">7</span>, <span class="hljs-number">8</span>], [<span class="hljs-number">9</span>, <span class="hljs-number">10</span>]], <span class="hljs-number">8</span>)
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// now the contents of myBuffer are:</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//  new Float32Array([0, 1, 7, 8, 9, 10, 0, 0, 0, .... ])</span>
+<span class="hljs-comment">//</span>
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferSubData.xml"><code>gl.bufferSubData</code></a></li>
+</ul>
+<h4 id="destroy">Destroy</h4>
+<p>Calling <code>.destroy()</code> on a buffer releases all resources associated to the buffer:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Create a buffer</span>
+<span class="hljs-keyword">var</span> myBuffer = regl.buffer(<span class="hljs-number">10</span>)
+
+<span class="hljs-comment">// destroys the buffer</span>
+myBuffer.destroy()
+</code></pre>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteBuffer.xml"><code>gl.deleteBuffer</code></a></li>
+</ul>
+<hr>
+<h3 id="elements">Elements</h3>
+<p><code>regl.elements</code> wraps WebGL element array buffer objects.  Each <code>regl.elements</code> object stores a buffer object as well as the primitive type and vertex count.</p>
+<h4 id="constructor-1">Constructor</h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> triElements = regl.elements([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">5</span>]
+])
+
+<span class="hljs-keyword">var</span> starElements = regl.elements({
+  primitive: <span class="hljs-string">'line loop'</span>,
+  count: <span class="hljs-number">5</span>,
+  data: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>([<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>])
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>The data of the element buffer</td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>usage</code></td>
+<td>Usage hint (see <code>gl.bufferData</code>)</td>
+<td><code>'static'</code></td>
+</tr>
+<tr>
+<td><code>length</code></td>
+<td>Length of the element buffer in bytes</td>
+<td><code>0</code> *</td>
+</tr>
+<tr>
+<td><code>primitive</code></td>
+<td>Default primitive type for element buffer</td>
+<td><code>'triangles'</code> *</td>
+</tr>
+<tr>
+<td><code>count</code></td>
+<td>Vertex count for element buffer</td>
+<td><code>0</code> *</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>usage</code> must take on one of the following values</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Usage Hint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'static'</code></td>
+<td><code>gl.DRAW_STATIC</code></td>
+</tr>
+<tr>
+<td><code>'dynamic'</code></td>
+<td><code>gl.DYNAMIC_DRAW</code></td>
+</tr>
+<tr>
+<td><code>'stream'</code></td>
+<td><code>gl.STREAM_DRAW</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>primitive</code> can be one of the following primitive types</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Primitive type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'points'</code></td>
+<td><code>gl.POINTS</code></td>
+</tr>
+<tr>
+<td><code>'lines'</code></td>
+<td>gl.LINES`</td>
+</tr>
+<tr>
+<td><code>'line strip'</code></td>
+<td><code>gl.LINE_STRIP</code></td>
+</tr>
+<tr>
+<td><code>'line loop</code></td>
+<td><code>gl.LINE_LOOP</code></td>
+</tr>
+<tr>
+<td><code>'triangles</code></td>
+<td><code>gl.TRIANGLES</code></td>
+</tr>
+<tr>
+<td><code>'triangle strip'</code></td>
+<td><code>gl.TRIANGLE_STRIP</code></td>
+</tr>
+<tr>
+<td><code>'triangle fan'</code></td>
+<td><code>gl.TRIANGLE_FAN</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes</strong></p>
+<ul>
+<li><code>primitive</code>, <code>count</code> and <code>length</code> are inferred from from the vertex data</li>
+</ul>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateBuffer.xml"><code>gl.createBuffer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml"><code>gl.bufferData</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDrawElements.xml"><code>gl.drawElements</code></a></li>
+</ul>
+<h4 id="update-1">Update</h4>
+<p>As in the case of buffers, calling an element buffer as a function reinitializes an element buffer in place.  The arguments are the same as for the constructor.  For example:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// First we create an element buffer</span>
+<span class="hljs-keyword">var</span> myElements = regl.elements()
+
+<span class="hljs-comment">// Then we update it by calling it directly</span>
+myElements({
+  data: [
+    [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+    [<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
+  ]
+})
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml"><code>gl.bufferData</code></a></li>
+</ul>
+<h5 id="in-place-update">In-place update</h5>
+<p>Again like buffers it is possible to preallocate an element buffer and update regions of the elements using the <code>subdata</code> command.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// First we preallocate the element buffer</span>
+<span class="hljs-keyword">var</span> myElements = regl.elements({
+  primitive: <span class="hljs-string">'triangles'</span>,
+  usage: <span class="hljs-string">'dynamic'</span>,
+  type: <span class="hljs-string">'uint16'</span>,
+  length: <span class="hljs-number">4096</span>,
+  count: <span class="hljs-number">0</span>
+})
+
+<span class="hljs-comment">// Then we can update into ranges of the element buffer using subdata</span>
+myElements.subdata(
+  [ [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+    [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>] ])
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferSubData.xml"><code>gl.bufferSubData</code></a></li>
+</ul>
+<h4 id="destroy-1">Destroy</h4>
+<pre><code class="lang-javascript"><span class="hljs-comment">// First we create an element buffer</span>
+<span class="hljs-keyword">var</span> myElements = regl.elements({ ... })
+
+<span class="hljs-comment">// Calling .destroy() on an element buffer releases all resources associated to</span>
+<span class="hljs-comment">// it</span>
+myElements.destroy()
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteBuffer.xml"><code>gl.deleteBuffer</code></a></li>
+</ul>
+<hr>
+<h3 id="textures">Textures</h3>
+<h4 id="constructor-2">Constructor</h4>
+<p>There are many ways to upload data to a texture in WebGL.  As with drawing commands, regl consolidates all of these crazy configuration parameters into one function.  Here are some examples of how to create a texture,</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// From size parameters</span>
+<span class="hljs-keyword">var</span> emptyTexture = regl.texture({
+  shape: [<span class="hljs-number">16</span>, <span class="hljs-number">16</span>]
+})
+
+<span class="hljs-comment">// From a flat array</span>
+<span class="hljs-keyword">var</span> typedArrayTexture = regl.texture({
+  width: <span class="hljs-number">2</span>,
+  height: <span class="hljs-number">2</span>,
+  data: [
+    <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,
+    <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>
+  ]
+})
+
+<span class="hljs-comment">// From a square array</span>
+<span class="hljs-keyword">var</span> nestedArrayTexture = regl.texture([
+  [ [<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>],  [<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>] ],
+  [ [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>], [<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>] ]
+])
+
+<span class="hljs-comment">// From an ndarray-like object</span>
+<span class="hljs-keyword">var</span> ndarrayTexture = regl.texture(<span class="hljs-built_in">require</span>(<span class="hljs-string">'baboon-image'</span>))
+
+<span class="hljs-comment">// Manual mipmap specification</span>
+<span class="hljs-keyword">var</span> mipmapTexture = regl.texture({
+  minFilter: <span class="hljs-string">'mipmap'</span>
+})
+
+<span class="hljs-comment">// From an image element</span>
+<span class="hljs-keyword">var</span> image = <span class="hljs-keyword">new</span> Image()
+image.src = <span class="hljs-string">'http://mydomain.com/myimage.png'</span>
+<span class="hljs-keyword">var</span> imageTexture = regl.texture(image)
+
+<span class="hljs-comment">// From a canvas</span>
+<span class="hljs-keyword">var</span> canvas = <span class="hljs-built_in">document</span>.createElement(canvas)
+<span class="hljs-keyword">var</span> context2D = canvas.getContext(<span class="hljs-string">'2d'</span>)
+<span class="hljs-keyword">var</span> canvasTexture = regl.texture(canvas)
+<span class="hljs-keyword">var</span> otherCanvasTexture = regl.texture(context2D)
+
+<span class="hljs-comment">// From a video element</span>
+<span class="hljs-keyword">var</span> video = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'video'</span>)
+<span class="hljs-keyword">var</span> videoTexture = regl.texture(video)
+
+<span class="hljs-comment">// From the pixels in the current frame buffer</span>
+<span class="hljs-keyword">var</span> copyPixels = regl.texture({
+  x: <span class="hljs-number">5</span>,
+  y: <span class="hljs-number">1</span>,
+  width: <span class="hljs-number">10</span>,
+  height: <span class="hljs-number">10</span>,
+  copy: <span class="hljs-literal">true</span>
+})
+</code></pre>
+<p>A data source from an image can be one of the following types:</p>
+<table>
+<thead>
+<tr>
+<th>Data type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rectangular array of arrays</td>
+<td>Interpreted as 2D array of arrays</td>
+</tr>
+<tr>
+<td>Typed array</td>
+<td>A binary array of pixel values</td>
+</tr>
+<tr>
+<td>Array</td>
+<td>Interpreted as array of pixel values with type based on the input type</td>
+</tr>
+<tr>
+<td><code>ndarray</code></td>
+<td>Any object with a <code>shape, stride, offset, data</code></td>
+</tr>
+<tr>
+<td>Image</td>
+<td>An HTML image element</td>
+</tr>
+<tr>
+<td>Video</td>
+<td>An HTML video element</td>
+</tr>
+<tr>
+<td>Canvas</td>
+<td>A canvas element</td>
+</tr>
+<tr>
+<td>Context 2D</td>
+<td>A canvas 2D context</td>
+</tr>
+<tr>
+<td>String</td>
+<td>A URL to an image or video to load</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>width</code></td>
+<td>Width of texture</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>height</code></td>
+<td>Height of texture</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>mag</code></td>
+<td>Sets magnification filter (see table)</td>
+<td><code>'nearest'</code></td>
+</tr>
+<tr>
+<td><code>min</code></td>
+<td>Sets minification filter (see table)</td>
+<td><code>'nearest'</code></td>
+</tr>
+<tr>
+<td><code>wrapS</code></td>
+<td>Sets wrap mode on S axis (see table)</td>
+<td><code>'repeat'</code></td>
+</tr>
+<tr>
+<td><code>wrapT</code></td>
+<td>Sets wrap mode on T axis (see table)</td>
+<td><code>'repeat'</code></td>
+</tr>
+<tr>
+<td><code>aniso</code></td>
+<td>Sets number of anisotropic samples, requires <a href="https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/">EXT_texture_filter_anisotropic</a></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>format</code></td>
+<td>Texture format (see table)</td>
+<td><code>'rgba'</code></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>Texture type (see table)</td>
+<td><code>'uint8'</code></td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td>Input data (see below)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>mipmap</code></td>
+<td>If set, regenerate mipmaps</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>flipY</code></td>
+<td>Flips textures vertically when uploading</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>alignment</code></td>
+<td>Sets unpack alignment per pixel</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>premultiplyAlpha</code></td>
+<td>Premultiply alpha when unpacking</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>colorSpace</code></td>
+<td>Sets colorspace conversion</td>
+<td><code>'browser'</code></td>
+</tr>
+<tr>
+<td><code>poll</code></td>
+<td>If set, then each frame check if this texture needs to be reuploaded</td>
+<td>Depends on the element type</td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td>Image data for the texture</td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>crossOrigin</code></td>
+<td>Cross origin resource sharing URL</td>
+<td><code>null</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>shape</code> can be used as an array shortcut for <code>[width, height, channels]</code> of image</li>
+<li><code>radius</code> can be specified for square images and sets both <code>width</code> and <code>height</code></li>
+<li><code>data</code> can take one of the following values,</li>
+<li>If an image element is specified and not yet loaded, then regl will upload a temporary image and hook a callback on the image</li>
+<li>If a video element is specified, then regl will reupload a frame of the video element each tick unless <code>poll</code> is set to false</li>
+<li><code>mag</code> sets <code>gl.MAG_FILTER</code> for the texture and can have one of the following values</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Mag filter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'nearest'</code></td>
+<td><code>gl.NEAREST</code></td>
+</tr>
+<tr>
+<td><code>'linear'</code></td>
+<td><code>gl.LINEAR</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>min</code> sets <code>gl.MIN_FILTER</code> for the texture, and can take on one of the following values,</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Min filter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'nearest'</code></td>
+<td><code>gl.NEAREST</code></td>
+</tr>
+<tr>
+<td><code>'linear'</code></td>
+<td><code>gl.LINEAR</code></td>
+</tr>
+<tr>
+<td><code>'mipmap', 'linear mipmap linear'</code></td>
+<td><code>gl.LINEAR_MIPMAP_LINEAR</code></td>
+</tr>
+<tr>
+<td><code>'nearest mipmap linear'</code></td>
+<td><code>gl.NEAREST_MIPMAP_LINEAR</code></td>
+</tr>
+<tr>
+<td><code>'linear mipmap nearest'</code></td>
+<td><code>gl.LINEAR_MIPMAP_NEAREST</code></td>
+</tr>
+<tr>
+<td><code>'nearest mipmap nearest'</code></td>
+<td><code>gl.NEAREST_MIPMAP_NEAREST</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>wrap</code> can be used as an array shortcut for <code>[wrapS, wrapT]</code></li>
+<li><code>wrapS</code> and <code>wrapT</code> can have any of the following values,</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Wrap mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'repeat'</code></td>
+<td><code>gl.REPEAT</code></td>
+</tr>
+<tr>
+<td><code>'clamp'</code></td>
+<td><code>gl.CLAMP_TO_EDGE</code></td>
+</tr>
+<tr>
+<td><code>'mirror'</code></td>
+<td><code>gl.MIRRORED_REPEAT</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>format</code> determines the format of the texture and possibly the type.  Possible values for <code>format</code> include,</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Description</th>
+<th>Channels</th>
+<th>Types</th>
+<th>Compressed?</th>
+<th>Extension?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'alpha'</code></td>
+<td><code>gl.ALPHA</code></td>
+<td>1</td>
+<td><code>'uint8','half float','float'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'luminance'</code></td>
+<td><code>gl.LUMINANCE</code></td>
+<td>1</td>
+<td><code>'uint8','half float','float'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'luminance alpha'</code></td>
+<td><code>gl.LUMINANCE_ALPHA</code></td>
+<td>2</td>
+<td><code>'uint8','half float','float'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'rgb'</code></td>
+<td><code>gl.RGB</code></td>
+<td>3</td>
+<td><code>'uint8','half float','float'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'rgba'</code></td>
+<td><code>gl.RGBA</code></td>
+<td>4</td>
+<td><code>'uint8','half float','float'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'rgba4'</code></td>
+<td><code>gl.RGBA4</code></td>
+<td>4</td>
+<td><code>'rgba4'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'rgb5 a1'</code></td>
+<td><code>gl.RGB5_A1</code></td>
+<td>4</td>
+<td><code>'rgb5 a1'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'rgb5'</code></td>
+<td><code>gl.RGB5</code></td>
+<td>3</td>
+<td><code>'rgb5'</code></td>
+<td>✖</td>
+<td></td>
+</tr>
+<tr>
+<td><code>'srgb'</code></td>
+<td><code>ext.SRGB</code></td>
+<td>3</td>
+<td><code>'uint8','half float','float'</code></td>
+<td>✖</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/EXT_sRGB/">EXT_sRGB</a></td>
+</tr>
+<tr>
+<td><code>'srgba'</code></td>
+<td><code>ext.RGBA</code></td>
+<td>4</td>
+<td><code>'uint8','half float','float'</code></td>
+<td>✖</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/EXT_sRGB/">EXT_sRGB</a></td>
+</tr>
+<tr>
+<td><code>'depth'</code></td>
+<td><code>gl.DEPTH_COMPONENT</code></td>
+<td>1</td>
+<td><code>'uint16','uint32'</code></td>
+<td>✖</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/">WEBGL_depth_texture</a></td>
+</tr>
+<tr>
+<td><code>'depth stencil'</code></td>
+<td><code>gl.DEPTH_STENCIL</code></td>
+<td>2</td>
+<td><code>'depth stencil'</code></td>
+<td>✖</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/">WEBGL_depth_texture</a></td>
+</tr>
+<tr>
+<td><code>'rgb s3tc dxt1'</code></td>
+<td><code>ext.COMPRESSED_RGB_S3TC_DXT1_EXT</code></td>
+<td>3</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/">WEBGL_compressed_texture_s3tc</a></td>
+</tr>
+<tr>
+<td><code>'rgba s3tc dxt1'</code></td>
+<td><code>ext.COMPRESSED_RGBA_S3TC_DXT1_EXT</code></td>
+<td>4</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/">WEBGL_compressed_texture_s3tc</a></td>
+</tr>
+<tr>
+<td><code>'rgba s3tc dxt3'</code></td>
+<td><code>ext.COMPRESSED_RGBA_S3TC_DXT3_EXT</code></td>
+<td>4</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/">WEBGL_compressed_texture_s3tc</a></td>
+</tr>
+<tr>
+<td><code>'rgba s3tc dxt5'</code></td>
+<td><code>ext.COMPRESSED_RGBA_S3TC_DXT5_EXT</code></td>
+<td>4</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/">WEBGL_compressed_texture_s3tc</a></td>
+</tr>
+<tr>
+<td><code>'rgb arc'</code></td>
+<td><code>ext.COMPRESSED_RGB_ATC_WEBGL</code></td>
+<td>3</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_atc/">WEBGL_compressed_texture_atc</a></td>
+</tr>
+<tr>
+<td><code>'rgba arc explicit alpha'</code></td>
+<td><code>ext.COMPRESSED_RGBA_ATC_EXPLICIT_ALPHA_WEBGL</code></td>
+<td>4</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_atc/">WEBGL_compressed_texture_atc</a></td>
+</tr>
+<tr>
+<td><code>'rgba arc interpolated alpha'</code></td>
+<td><code>ext.COMPRESSED_RGBA_ATC_INTERPOLATED_ALPHA_WEBGL</code></td>
+<td>4</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_atc/">WEBGL_compressed_texture_atc</a></td>
+</tr>
+<tr>
+<td><code>'rgb pvrtc 4bppv1'</code></td>
+<td><code>ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG</code></td>
+<td>3</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/">WEBGL_compressed_texture_pvrtc</a></td>
+</tr>
+<tr>
+<td><code>'rgb pvrtc 2bppv1'</code></td>
+<td><code>ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG</code></td>
+<td>3</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/">WEBGL_compressed_texture_pvrtc</a></td>
+</tr>
+<tr>
+<td><code>'rgba pvrtc 4bppv1'</code></td>
+<td><code>ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG</code></td>
+<td>4</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/">WEBGL_compressed_texture_pvrtc</a></td>
+</tr>
+<tr>
+<td><code>'rgba pvrtc 2bppv1'</code></td>
+<td><code>ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG</code></td>
+<td>4</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/">WEBGL_compressed_texture_pvrtc</a></td>
+</tr>
+<tr>
+<td><code>'rgb etc1'</code></td>
+<td><code>ext.COMPRESSED_RGB_ETC1_WEBGL</code></td>
+<td>3</td>
+<td><code>'uint8'</code></td>
+<td>✓</td>
+<td><a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_etc1/">WEBGL_compressed_texture_etc1</a></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>In many cases <code>type</code> can be inferred from the format and other information in the texture.  However, in some situations it may still be necessary to set it manually.  In such an event, the following values are possible,</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'uint8'</code></td>
+<td><code>gl.UNSIGNED_BYTE</code></td>
+</tr>
+<tr>
+<td><code>'uint16'</code></td>
+<td><code>gl.UNSIGNED_SHORT</code></td>
+</tr>
+<tr>
+<td><code>'uint32'</code></td>
+<td><code>gl.UNSIGNED_INT</code></td>
+</tr>
+<tr>
+<td><code>'float'</code></td>
+<td><code>gl.FLOAT</code></td>
+</tr>
+<tr>
+<td><code>'half float'</code></td>
+<td><code>ext.HALF_FLOAT_OES</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>colorSpace</code> sets the WebGL color space flag for pixel unpacking</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Color space</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'none'</code></td>
+<td><code>gl.NONE</code></td>
+</tr>
+<tr>
+<td><code>'browser'</code></td>
+<td><code>gl.BROWSER_DEFAULT_WEBGL</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>unpackAlignment</code> sets the pixel unpack alignment and must be one of <code>[1, 2, 4, 8]</code></li>
+</ul>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateTexture.xml"><code>gl.createTexture</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexParameter.xml"><code>gl.texParameter</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml"><code>gl.pixelStorei</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexImage2D.xml"><code>gl.texImage2D</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexImage2D.xml"><code>gl.texImage2D</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompressedTexImage2D.xml"><code>gl.compressedTexImage2D</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCopyTexImage2D.xml"><code>gl.copyTexImage2D</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenerateMipmap.xml"><code>gl.generateMipmap</code></a></li>
+</ul>
+<h4 id="update-2">Update</h4>
+<p><strong>TODO</strong></p>
+<h4 id="destroy-2">Destroy</h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> myTexture = regl.texture({ ... })
+
+myTexture.destroy()
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteTexture.xml"><code>gl.deleteTexture</code></a></li>
+</ul>
+<hr>
+<h3 id="cube-maps">Cube maps</h3>
+<h4 id="constructor-3">Constructor</h4>
+<p>Cube maps follow similar syntax to textures.  They are created using <code>regl.cube()</code></p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> cubeMap = regl.cube(
+  <span class="hljs-string">'posx.jpg'</span>,
+  <span class="hljs-string">'negx.jpg'</span>,
+  <span class="hljs-string">'posy.jpg'</span>,
+  <span class="hljs-string">'negy.jpg'</span>,
+  <span class="hljs-string">'posz.jpg'</span>,
+  <span class="hljs-string">'negz.jpg'</span>)
+</code></pre>
+<h4 id="update-3">Update</h4>
+<p><strong>TODO</strong></p>
+<h4 id="destroy-3">Destroy</h4>
+<pre><code class="lang-javascript">cubeMap.destroy()
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteTexture.xml"><code>gl.deleteTexture</code></a></li>
+</ul>
+<hr>
+<h3 id="render-buffers">Render buffers</h3>
+<h4 id="constructor-4">Constructor</h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> rb = regl.renderbuffer({
+  width: <span class="hljs-number">16</span>,
+  height: <span class="hljs-number">16</span>,
+  format: <span class="hljs-string">'rgba4'</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Interpretation</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'format'</code></td>
+<td>Sets the internal format of the render buffer</td>
+<td><code>'rgba4'</code></td>
+</tr>
+<tr>
+<td><code>'width'</code></td>
+<td>Sets the width of the render buffer in pixels</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>'height'</code></td>
+<td>Sets the height of the render buffer in pixels</td>
+<td><code>1</code></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'rgba4'</code></td>
+<td><code>gl.RGBA4</code></td>
+</tr>
+<tr>
+<td><code>'rgb565'</code></td>
+<td><code>gl.RGB565</code></td>
+</tr>
+<tr>
+<td><code>'rgb5 a1'</code></td>
+<td><code>gl.RGB5_A1</code></td>
+</tr>
+<tr>
+<td><code>'depth'</code></td>
+<td><code>gl.DEPTH_COMPONENT16</code></td>
+</tr>
+<tr>
+<td><code>'stencil'</code></td>
+<td><code>gl.STENCIL_INDEX8</code></td>
+</tr>
+<tr>
+<td><code>'srgba'</code></td>
+<td><code>ext.SRGB8_ALPHA8_EXT</code>, only if <a href="https://www.khronos.org/registry/webgl/extensions/EXT_sRGB/">EXT_sRGB</a> supported</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateRenderbuffer.xml"><code>gl.createRenderbuffer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteRenderbuffer.xml"><code>gl.deleteRenderbuffer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glRenderbufferStorage.xml"><code>gl.renderbufferStorage</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindRenderbuffer.xml"><code>gl.bindRenderbuffer</code></a></li>
+</ul>
+<h4 id="update-4">Update</h4>
+<p><strong>TODO</strong></p>
+<h4 id="destroy-4">Destroy</h4>
+<pre><code class="lang-javascript">rb.destroy()
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteRenderbuffer.xml"><code>gl.deleteRenderbuffer</code></a></li>
+</ul>
+<hr>
+<h3 id="frame-buffers">Frame buffers</h3>
+<h4 id="constructor-5">Constructor</h4>
+<p>Example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> fbo = regl.framebuffer({
+  width: <span class="hljs-number">256</span>,
+  height: <span class="hljs-number">256</span>,
+  depth: <span class="hljs-literal">true</span>,
+  stencil: <span class="hljs-literal">true</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>width</code></td>
+<td>Sets the width of the framebuffer</td>
+<td><code>gl.drawingBufferWidth</code></td>
+</tr>
+<tr>
+<td><code>height</code></td>
+<td>Sets the height of the framebuffer</td>
+<td><code>gl.drawingBufferHeight</code></td>
+</tr>
+<tr>
+<td><code>format</code></td>
+<td>Sets the format of the color buffer</td>
+<td><code>'rgba'</code></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>Sets the type of the color buffer if it is a texture</td>
+<td><code>'uint8'</code></td>
+</tr>
+<tr>
+<td><code>colorCount</code></td>
+<td>Sets the number of color buffers</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td>Toggles whether or not a depth buffer is included</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>stencil</code></td>
+<td>Toggles whether or not to use a stencil buffer</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>depthTexture</code></td>
+<td>Toggles whether depth/stencil attachments should be in texture</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>colorBuffers</code></td>
+<td>List of color buffer attachments</td>
+<td></td>
+</tr>
+<tr>
+<td><code>depthBuffer</code></td>
+<td>The depth buffer attachment</td>
+<td></td>
+</tr>
+<tr>
+<td><code>stencilBuffer</code></td>
+<td>The stencil buffer attachment</td>
+<td></td>
+</tr>
+<tr>
+<td><code>depthStencilBuffer</code></td>
+<td>The depth-stencil attachment</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Color format</th>
+<th>Description</th>
+<th>Attachment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'alpha'</code></td>
+<td><code>gl.ALPHA</code></td>
+<td>Texture</td>
+</tr>
+<tr>
+<td><code>'luminance'</code></td>
+<td><code>gl.LUMINANCE</code></td>
+<td>Texture</td>
+</tr>
+<tr>
+<td><code>'luminance alpha'</code></td>
+<td><code>gl.LUMINANCE_ALPHA</code></td>
+<td>Texture</td>
+</tr>
+<tr>
+<td><code>'rgb'</code></td>
+<td><code>gl.RGB</code></td>
+<td>Texture</td>
+</tr>
+<tr>
+<td><code>'rgba'</code></td>
+<td><code>gl.RGBA</code></td>
+<td>Texture</td>
+</tr>
+<tr>
+<td><code>'rgba4'</code></td>
+<td><code>gl.RGBA4</code></td>
+<td>Renderbuffer</td>
+</tr>
+<tr>
+<td><code>'rgb565'</code></td>
+<td><code>gl.RGB565</code></td>
+<td>Renderbuffer</td>
+</tr>
+<tr>
+<td><code>'rgb5 a1'</code></td>
+<td><code>gl.RGB5_A1</code></td>
+<td>Renderbuffer</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Color type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'best'</code></td>
+<td>Highest available precision</td>
+</tr>
+<tr>
+<td><code>'uint8'</code></td>
+<td><code>gl.UNSIGNED_BYTE</code></td>
+</tr>
+<tr>
+<td><code>'half float'</code></td>
+<td>16 bit float</td>
+</tr>
+<tr>
+<td><code>'float'</code></td>
+<td>32 bit float`</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateFramebuffer.xml"><code>gl.createFramebuffer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteFramebuffer.xml"><code>gl.deleteFramebuffer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glFramebufferRenderbuffer.xml"><code>gl.framebufferRenderbuffer</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glFramebufferTexture2D.xml"><code>gl.framebufferTexture2D</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindFramebuffer.xml"><code>gl.bindFramebuffer</code></a></li>
+</ul>
+<h4 id="update-5">Update</h4>
+<p><strong>TODO</strong></p>
+<h4 id="destroy-5">Destroy</h4>
+<pre><code class="lang-javascript">fbo.destroy()
+</code></pre>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteFramebuffer.xml"><code>gl.deleteFramebuffer</code></a></li>
+</ul>
+<hr>
+<h3 id="cubic-frame-buffers">Cubic frame buffers</h3>
+<p><strong>TODO</strong></p>
+<h4 id="constructor-6">Constructor</h4>
+<h4 id="update-6">Update</h4>
+<h4 id="destroy-6">Destroy</h4>
+<hr>
+<h2 id="other-features">Other features</h2>
+<p>Other than draw commands and resources, there are a few miscellaneous parts of the WebGL API which REGL wraps for completeness.</p>
+<hr>
+<h3 id="clear-the-draw-buffer">Clear the draw buffer</h3>
+<p><code>regl.clear</code> combines <code>gl.clearColor, gl.clearDepth, gl.clearStencil</code> and <code>gl.clear</code> into a single procedure, which has the following usage:</p>
+<pre><code class="lang-javascript">regl.clear({
+  color: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+  depth: <span class="hljs-number">1</span>,
+  stencil: <span class="hljs-number">0</span>
+})
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>color</code></td>
+<td>Sets the clear color</td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td>Sets the clear depth value</td>
+</tr>
+<tr>
+<td><code>stencil</code></td>
+<td>Sets the clear stencil value</td>
+</tr>
+</tbody>
+</table>
+<p>If an option is not present, then the corresponding buffer is not cleared</p>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearColor.xml"><code>gl.clearColor</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearDepth.xml"><code>gl.clearDepth</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearStencil.xml"><code>gl.clearStencil</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml"><code>gl.clear</code></a></li>
+</ul>
+<hr>
+<h3 id="reading-pixels">Reading pixels</h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> pixels = regl.read([options])
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>An optional <code>ArrayBufferView</code> which gets the result of reading the pixels</td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>The x-offset of the upper-left corner of the rectangle in pixels</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td>The y-offset of the upper-left corner of the rectangle in pixels</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td>The width of the rectangle in pixels</td>
+<td>viewport.width</td>
+</tr>
+<tr>
+<td><code>height</code></td>
+<td>The height of the rectangle in pixels</td>
+<td>viewport.height</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml"><code>gl.pixelStorei</code></a></li>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glReadPixels.xml"><code>gl.readPixels</code></a></li>
+</ul>
+<hr>
+<h3 id="per-frame-callbacks">Per-frame callbacks</h3>
+<p><code>regl</code> also provides a common wrapper over <code>requestAnimationFrame</code> and <code>cancelAnimationFrame</code> that integrates gracefully with context loss events.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Hook a callback to execute each frame</span>
+<span class="hljs-keyword">var</span> tick = regl.frame(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
+
+  <span class="hljs-comment">// context is the default state of the regl context variables</span>
+
+  <span class="hljs-comment">// ...</span>
+})
+
+<span class="hljs-comment">// When we are done, we can unsubscribe by calling cancel on the callback</span>
+tick.cancel()
+</code></pre>
+<hr>
+<h3 id="device-capabilities-and-limits">Device capabilities and limits</h3>
+<p>regl exposes info about the WebGL context limits and capabilities via the <code>regl.limits</code> object.  The following properties are supported,</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>colorBits</code></td>
+<td>An array of bits depths for the red, green, blue and alpha channels</td>
+</tr>
+<tr>
+<td><code>depthBits</code></td>
+<td>Bit depth of drawing buffer</td>
+</tr>
+<tr>
+<td><code>stencilBits</code></td>
+<td>Bit depth of stencil buffer</td>
+</tr>
+<tr>
+<td><code>subpixelBits</code></td>
+<td><code>gl.SUBPIXEL_BITS</code></td>
+</tr>
+<tr>
+<td><code>extensions</code></td>
+<td>A list of all supported extensions</td>
+</tr>
+<tr>
+<td><code>maxAnisotropic</code></td>
+<td>Maximum number of anisotropic filtering samples</td>
+</tr>
+<tr>
+<td><code>maxDrawbuffers</code></td>
+<td>Maximum number of draw buffers</td>
+</tr>
+<tr>
+<td><code>maxColorAttachments</code></td>
+<td>Maximum number of color attachments</td>
+</tr>
+<tr>
+<td><code>pointSizeDims</code></td>
+<td><code>gl.ALIASED_POINT_SIZE_RANGE</code></td>
+</tr>
+<tr>
+<td><code>lineWidthDims</code></td>
+<td><code>gl.ALIASED_LINE_WIDTH_RANGE</code></td>
+</tr>
+<tr>
+<td><code>maxViewportDims</code></td>
+<td><code>gl.MAX_VIEWPORT_DIMS</code></td>
+</tr>
+<tr>
+<td><code>maxCombinedTextureUnits</code></td>
+<td><code>gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS</code></td>
+</tr>
+<tr>
+<td><code>maxCubeMapSize</code></td>
+<td><code>gl.MAX_CUBE_MAP_TEXTURE_SIZE</code></td>
+</tr>
+<tr>
+<td><code>maxRenderbufferSize</code></td>
+<td><code>gl.MAX_RENDERBUFFER_SIZE</code></td>
+</tr>
+<tr>
+<td><code>maxTextureUnits</code></td>
+<td><code>gl.MAX_TEXTURE_IMAGE_UNITS</code></td>
+</tr>
+<tr>
+<td><code>maxTextureSize</code></td>
+<td><code>gl.MAX_TEXTURE_SIZE</code></td>
+</tr>
+<tr>
+<td><code>maxAttributes</code></td>
+<td><code>gl.MAX_VERTEX_ATTRIBS</code></td>
+</tr>
+<tr>
+<td><code>maxVertexUniforms</code></td>
+<td><code>gl.MAX_VERTEX_UNIFORM_VECTORS</code></td>
+</tr>
+<tr>
+<td><code>maxVertexTextureUnits</code></td>
+<td><code>gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS</code></td>
+</tr>
+<tr>
+<td><code>maxVaryingVectors</code></td>
+<td><code>gl.MAX_VARYING_VECTORS</code></td>
+</tr>
+<tr>
+<td><code>maxFragmentUniforms</code></td>
+<td><code>gl.MAX_FRAGMENT_UNIFORM_VECTORS</code></td>
+</tr>
+<tr>
+<td><code>glsl</code></td>
+<td><code>gl.SHADING_LANGUAGE_VERSION</code></td>
+</tr>
+<tr>
+<td><code>renderer</code></td>
+<td><code>gl.RENDERER</code></td>
+</tr>
+<tr>
+<td><code>vendor</code></td>
+<td><code>gl.VENDOR</code></td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><code>gl.VERSION</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relevant WebGL APIs</strong></p>
+<ul>
+<li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetParameter.xml"><code>gl.getParameter</code></a></li>
+</ul>
+<hr>
+<h3 id="performance-metrics">Performance metrics</h3>
+<p><strong>TODO</strong></p>
+<hr>
+<h3 id="clean-up">Clean up</h3>
+<p>When a <code>regl</code> context is no longer needed, it can be destroyed releasing all associated resources with the following command:</p>
+<pre><code class="lang-javascript">regl.destroy()
+</code></pre>
+<hr>
+<h3 id="context-loss">Context loss</h3>
+<p><code>regl</code> makes a best faith effort to handle context loss by default.  This means that buffers and textures are reinitialized on a context restore with their contents.</p>
+<p><strong>TODO</strong></p>
+<hr>
+<h3 id="unsafe-escape-hatch">Unsafe escape hatch</h3>
+<p><strong>WARNING</strong>: <code>regl</code> is designed in such a way that you should never have to directly access the underlying WebGL context. However, if you really absolutely need to do this for some reason (for example to interface with an external library), you can still get a reference to the WebGL context.  Note though that if you do this you will need to restore the <code>regl</code> state in order to prevent rendering errors.  This can be done with the following unsafe methods:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// This retrieves a reference to the underlying WebGL context (don't do this!)</span>
+<span class="hljs-keyword">var</span> gl = regl._gl
+
+<span class="hljs-comment">//  ... do some crazy direct manipulation here</span>
+
+<span class="hljs-comment">// now restore the regl state</span>
+regl._refresh()
+
+<span class="hljs-comment">// Resume using regl as normal</span>
+</code></pre>
+<p>Note that you must call <code>regl._refresh()</code> if you have changed the WebGL state.</p>
+<hr>
+<h2 id="tips">Tips</h2>
+<h3 id="reuse-resources-buffers-elements-textures-etc-">Reuse resources (buffers, elements, textures, etc.)</h3>
+<h3 id="preallocate-memory">Preallocate memory</h3>
+<h3 id="debug-vs-release">Debug vs release</h3>
+<ul>
+<li>Debug mode inserts many checks</li>
+<li>Compiling in release mode removes these assertions, improves performance and reduces bundle size</li>
+</ul>
+<h3 id="context-loss-mitigation">Context loss mitigation</h3>
