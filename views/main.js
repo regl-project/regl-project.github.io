@@ -35,10 +35,6 @@ module.exports = function (params, state, send) {
         <span class ='color-block-small orange'></span>
       </div>
       <div class='callout'>
-        <a class='link' href='/comparisons'>comparisons</a>
-        <span class ='color-block-small pink'></span>
-      </div>
-      <div class='callout'>
         <a class='link' href='/api'>api</a>
         <span class ='color-block-small green'></span>
       </div>
@@ -49,3 +45,8 @@ module.exports = function (params, state, send) {
     </div>
   </main>`
 }
+
+// <div class='callout'>
+//   <a class='link' href='/comparisons'>comparisons</a>
+//   <span class ='color-block-small pink'></span>
+// </div>
