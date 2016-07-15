@@ -119,7 +119,7 @@ command(props, <span class="hljs-function"><span class="hljs-keyword">function</
     <span class="hljs-comment">//  * batchId: which is the index of the draw command in the batch</span>
     <span class="hljs-comment">//</span>
     angle: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context, props, batchId</span>) </span>{
-      <span class="hljs-keyword">return</span> args.speed * context.tick + <span class="hljs-number">0.01</span> * batchId
+      <span class="hljs-keyword">return</span> args.speed * stats.count + <span class="hljs-number">0.01</span> * batchId
     },
 
     <span class="hljs-comment">// As a shortcut/optimization we can also just read out a property</span>
@@ -183,8 +183,12 @@ drawSpinningStretchyTriangle([
 </thead>
 <tbody>
 <tr>
-<td><code>tick</code></td>
+<td><code>frameCount</code></td>
 <td>The number of frames rendered</td>
+</tr>
+<tr>
+<td><code>deltaTime</code></td>
+<td>Time since the last frame was rendered in seconds</td>
 </tr>
 <tr>
 <td><code>time</code></td>
@@ -1375,8 +1379,8 @@ teapotMesh.draw({
     box: {
       x: <span class="hljs-number">10</span>,
       y: <span class="hljs-number">20</span>,
-      width: <span class="hljs-number">100</span>,
-      height: <span class="hljs-number">100</span>
+      w: <span class="hljs-number">100</span>,
+      h: <span class="hljs-number">100</span>
     }
   }
 
@@ -1400,7 +1404,7 @@ teapotMesh.draw({
 <tr>
 <td><code>box</code></td>
 <td>Sets <code>gl.scissor</code></td>
-<td><code>{}</code></td>
+<td><code>{x:0,y:0}</code></td>
 </tr>
 </tbody>
 </table>
@@ -1427,8 +1431,8 @@ teapotMesh.draw({
   viewport: {
     x: <span class="hljs-number">5</span>,
     y: <span class="hljs-number">10</span>,
-    width: <span class="hljs-number">100</span>,
-    height: <span class="hljs-number">50</span>
+    w: <span class="hljs-number">100</span>,
+    h: <span class="hljs-number">50</span>
   }
 
   <span class="hljs-comment">// ...</span>
@@ -2379,12 +2383,6 @@ myTexture.subimage({
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCopyTexSubImage2D.xml"><code>gl.copyTexSubImage2D</code></a></li>
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompressedTexSubImage2D.xml"><code>gl.compressedTexSubImage2D</code></a></li>
 </ul>
-<h5 id="resize">Resize</h5>
-<p>Finally, textures can be resized with the <code>.resize()</code> method.  Note that this clears the contents of the texture and is not supported by compressed textures.</p>
-<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> texture = regl.texture(<span class="hljs-number">5</span>)
-
-texture.resize(<span class="hljs-number">3</span>, <span class="hljs-number">7</span>)
-</code></pre>
 <h4 id="destroy-2">Destroy</h4>
 <p>Finally, when a texture is no longer needed it can be released by calling the <code>destroy()</code> method:</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> myTexture = regl.texture({ ... })
@@ -2461,15 +2459,11 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <hr>
 <h3 id="render-buffers">Render buffers</h3>
 <h4 id="constructor-4">Constructor</h4>
-<pre><code class="lang-javascript"><span class="hljs-comment">// Allocate a new renderbuffer with the prescribed format</span>
-<span class="hljs-keyword">var</span> rb = regl.renderbuffer({
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> rb = regl.renderbuffer({
   width: <span class="hljs-number">16</span>,
   height: <span class="hljs-number">16</span>,
   format: <span class="hljs-string">'rgba4'</span>
 })
-
-<span class="hljs-comment">// Allocate an 'rgba4' renderbuffer with a fixed size</span>
-<span class="hljs-keyword">var</span> rgba_16x24 = regl.renderbuffer(<span class="hljs-number">16</span>, <span class="hljs-number">24</span>)
 </code></pre>
 <table>
 <thead>
@@ -2482,7 +2476,7 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <tbody>
 <tr>
 <td><code>'format'</code></td>
-<td>Sets the internal format of the render buffer (see below)</td>
+<td>Sets the internal format of the render buffer</td>
 <td><code>'rgba4'</code></td>
 </tr>
 <tr>
@@ -2493,16 +2487,6 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <tr>
 <td><code>'height'</code></td>
 <td>Sets the height of the render buffer in pixels</td>
-<td><code>1</code></td>
-</tr>
-<tr>
-<td><code>'shape'</code></td>
-<td>Alias for width and height</td>
-<td><code>[1,1]</code></td>
-</tr>
-<tr>
-<td><code>'radius'</code></td>
-<td>Simultaneously sets width and height</td>
 <td><code>1</code></td>
 </tr>
 </tbody>
@@ -2539,18 +2523,6 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <td><code>'srgba'</code></td>
 <td><code>ext.SRGB8_ALPHA8_EXT</code>, only if <a href="https://www.khronos.org/registry/webgl/extensions/EXT_sRGB/">EXT_sRGB</a> supported</td>
 </tr>
-<tr>
-<td><code>'rgba16f'</code></td>
-<td>16 bit floating point RGBA buffer, only if <a href="https://www.khronos.org/registry/webgl/extensions/EXT_color_buffer_half_float/">EXT_color_buffer_half_float</a></td>
-</tr>
-<tr>
-<td><code>'rgb16f'</code></td>
-<td>16 bit floating point RGB buffer, only if <a href="https://www.khronos.org/registry/webgl/extensions/EXT_color_buffer_half_float/">EXT_color_buffer_half_float</a></td>
-</tr>
-<tr>
-<td><code>'rgba32f'</code></td>
-<td>32 bit floating point RGBA buffer, only if <a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_color_buffer_float/">WEBGL_color_buffer_float</a> supported</td>
-</tr>
 </tbody>
 </table>
 <p><strong>Relevant WebGL APIs</strong></p>
@@ -2561,23 +2533,7 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindRenderbuffer.xml"><code>gl.bindRenderbuffer</code></a></li>
 </ul>
 <h4 id="update-4">Update</h4>
-<p>Like all other resources, renderbuffers can be updated in place:</p>
-<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> renderbuffer = regl.renderbuffer()
-
-renderbuffer({
-  radius: <span class="hljs-number">3</span>,
-  format: <span class="hljs-string">'depth'</span>
-})
-</code></pre>
-<h5 id="resizing">Resizing</h5>
-<p>A renderbuffer can also be resized in place by calling <code>.resize()</code>:</p>
-<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> renderbuffer = regl.renderbuffer({
-  shape: [<span class="hljs-number">10</span>, <span class="hljs-number">10</span>],
-  format: <span class="hljs-string">'depth stencil'</span>
-})
-
-renderbuffer.resize(<span class="hljs-number">32</span>, <span class="hljs-number">32</span>)
-</code></pre>
+<p><strong>TODO</strong></p>
 <h4 id="destroy-4">Destroy</h4>
 <pre><code class="lang-javascript">rb.destroy()
 </code></pre>
@@ -2586,23 +2542,14 @@ renderbuffer.resize(<span class="hljs-number">32</span>, <span class="hljs-numbe
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glDeleteRenderbuffer.xml"><code>gl.deleteRenderbuffer</code></a></li>
 </ul>
 <hr>
-<h3 id="framebuffers">Framebuffers</h3>
+<h3 id="frame-buffers">Frame buffers</h3>
 <h4 id="constructor-5">Constructor</h4>
 <p>Example,</p>
-<pre><code class="lang-javascript"><span class="hljs-comment">// Creating a simple 2x2 framebuffer:</span>
-<span class="hljs-keyword">var</span> fbo2x2 = regl.framebuffer(<span class="hljs-number">2</span>)
-
-<span class="hljs-comment">// A 256x256 framebuffer without a stencil attachment</span>
-<span class="hljs-keyword">var</span> fbo = regl.framebuffer({
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> fbo = regl.framebuffer({
   width: <span class="hljs-number">256</span>,
   height: <span class="hljs-number">256</span>,
-  stencil: <span class="hljs-literal">false</span>
-})
-
-<span class="hljs-comment">// A framebuffer with a color buffer</span>
-<span class="hljs-keyword">var</span> texture = regl.texture(<span class="hljs-number">16</span>)
-<span class="hljs-keyword">var</span> texFBO = regl.framebuffer({
-  color: texture
+  depth: <span class="hljs-literal">true</span>,
+  stencil: <span class="hljs-literal">true</span>
 })
 </code></pre>
 <table>
@@ -2625,44 +2572,53 @@ renderbuffer.resize(<span class="hljs-number">32</span>, <span class="hljs-numbe
 <td><code>gl.drawingBufferHeight</code></td>
 </tr>
 <tr>
-<td><code>color</code></td>
-<td>An optional array of either textures renderbuffers for the color attachment.</td>
-<td></td>
-</tr>
-<tr>
-<td><code>depth</code></td>
-<td>If boolean, then toggles the depth attachment.  Otherwise if a renderbuffer/texture sets the depth attachment.</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>stencil</code></td>
-<td>If boolean, then toggles the stencil attachment.  Otherwise if a renderbuffer sets the stencil attachment.</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>depthStencil</code></td>
-<td>If boolean, then toggles both the depth and stencil attachment.  Otherwise if a renderbuffer/texture sets the combined depth/stencil attachment.</td>
-<td><code>true</code></td>
-</tr>
-<tr>
-<td><code>colorFormat</code></td>
-<td>Sets the format of the color buffer.  Ignored if color</td>
+<td><code>format</code></td>
+<td>Sets the format of the color buffer</td>
 <td><code>'rgba'</code></td>
 </tr>
 <tr>
-<td><code>colorType</code></td>
+<td><code>type</code></td>
 <td>Sets the type of the color buffer if it is a texture</td>
 <td><code>'uint8'</code></td>
 </tr>
 <tr>
 <td><code>colorCount</code></td>
-<td>Sets the number of color buffers. Values &gt; 1 require <a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_draw_buffers/">WEBGL_draw_buffers</a></td>
+<td>Sets the number of color buffers</td>
 <td><code>1</code></td>
 </tr>
 <tr>
-<td><code>depthTexture</code></td>
-<td>Toggles whether depth/stencil attachments should be in texture. Requires <a href="https://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/">WEBGL_depth_texture</a></td>
+<td><code>depth</code></td>
+<td>Toggles whether or not a depth buffer is included</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>stencil</code></td>
+<td>Toggles whether or not to use a stencil buffer</td>
 <td><code>false</code></td>
+</tr>
+<tr>
+<td><code>depthTexture</code></td>
+<td>Toggles whether depth/stencil attachments should be in texture</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>colorBuffers</code></td>
+<td>List of color buffer attachments</td>
+<td></td>
+</tr>
+<tr>
+<td><code>depthBuffer</code></td>
+<td>The depth buffer attachment</td>
+<td></td>
+</tr>
+<tr>
+<td><code>stencilBuffer</code></td>
+<td>The stencil buffer attachment</td>
+<td></td>
+</tr>
+<tr>
+<td><code>depthStencilBuffer</code></td>
+<td>The depth-stencil attachment</td>
 </tr>
 </tbody>
 </table>
@@ -2715,21 +2671,6 @@ renderbuffer.resize(<span class="hljs-number">32</span>, <span class="hljs-numbe
 <td><code>gl.RGB5_A1</code></td>
 <td>Renderbuffer</td>
 </tr>
-<tr>
-<td><code>'rgb16f'</code></td>
-<td><code>gl.RGBA4</code></td>
-<td>Renderbuffer</td>
-</tr>
-<tr>
-<td><code>'rgba16f'</code></td>
-<td><code>gl.RGB565</code></td>
-<td>Renderbuffer</td>
-</tr>
-<tr>
-<td><code>'rgba32f'</code></td>
-<td><code>gl.RGBA32F</code></td>
-<td>Renderbuffer</td>
-</tr>
 </tbody>
 </table>
 <table>
@@ -2741,12 +2682,16 @@ renderbuffer.resize(<span class="hljs-number">32</span>, <span class="hljs-numbe
 </thead>
 <tbody>
 <tr>
+<td><code>'best'</code></td>
+<td>Highest available precision</td>
+</tr>
+<tr>
 <td><code>'uint8'</code></td>
 <td><code>gl.UNSIGNED_BYTE</code></td>
 </tr>
 <tr>
 <td><code>'half float'</code></td>
-<td>16 bit float, requires</td>
+<td>16 bit float</td>
 </tr>
 <tr>
 <td><code>'float'</code></td>
@@ -2754,11 +2699,6 @@ renderbuffer.resize(<span class="hljs-number">32</span>, <span class="hljs-numbe
 </tr>
 </tbody>
 </table>
-<p><strong>Notes</strong></p>
-<ul>
-<li>If <code>color</code> is not specified, then color attachments are created manually</li>
-<li>Instead of passing width/height, it is also possible to pass in <code>shape</code> to the framebuffer constructor.</li>
-</ul>
 <p><strong>Relevant WebGL APIs</strong></p>
 <ul>
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateFramebuffer.xml"><code>gl.createFramebuffer</code></a></li>
@@ -2768,22 +2708,8 @@ renderbuffer.resize(<span class="hljs-number">32</span>, <span class="hljs-numbe
 <li><a href="https://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindFramebuffer.xml"><code>gl.bindFramebuffer</code></a></li>
 </ul>
 <h4 id="update-5">Update</h4>
-<p>Like all other objects, a framebuffer can be updated in place:</p>
-<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> framebuffer = regl.framebuffer(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>)
-
-framebuffer({
-  shape: [<span class="hljs-number">8</span>, <span class="hljs-number">10</span>],
-  depth: <span class="hljs-literal">false</span>
-})
-</code></pre>
-<h5 id="resizing">Resizing</h5>
-<p>Framebuffers can be resized using the <code>.resize()</code> method.  This method will also modify all of the framebuffer's attachments.</p>
-<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> framebuffer = regl.framebuffer(<span class="hljs-number">20</span>, <span class="hljs-number">4</span>)
-
-framebuffer.resize(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>)
-</code></pre>
+<p><strong>TODO</strong></p>
 <h4 id="destroy-5">Destroy</h4>
-<p>Calling <code>.destroy()</code> on a framebuffer removes it and recursively destroys any non-shared attachments.</p>
 <pre><code class="lang-javascript">fbo.destroy()
 </code></pre>
 <p><strong>Relevant WebGL APIs</strong></p>
@@ -3016,46 +2942,6 @@ tick.cancel()
 </ul>
 <hr>
 <h3 id="performance-metrics">Performance metrics</h3>
-<p><code>regl</code> tracks several metrics per command.  These can be read using the <code>regl.stats</code> object:</p>
-<table>
-<thead>
-<tr>
-<th>Metric</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>bufferCount</code></td>
-<td>The number of array buffers currently allocated</td>
-</tr>
-<tr>
-<td><code>elementsCount</code></td>
-<td>The number of element buffers currently allocated</td>
-</tr>
-<tr>
-<td><code>framebufferCount</code></td>
-<td>The number of framebuffer currently allocated</td>
-</tr>
-<tr>
-<td><code>shaderCount</code></td>
-<td>The number of shaders currently allocated</td>
-</tr>
-<tr>
-<td><code>textureCount</code></td>
-<td>The number of textures currently allocated</td>
-</tr>
-<tr>
-<td><code>cubeCount</code></td>
-<td>The number of cube maps currently allocated</td>
-</tr>
-<tr>
-<td><code>renderbufferCount</code></td>
-<td>The number of rnderbuffers currently allocated</td>
-</tr>
-</tbody>
-</table>
-<h4 id="per-command-stats">Per-command stats</h4>
 <p><strong>TODO</strong></p>
 <hr>
 <h3 id="clean-up">Clean up</h3>
