@@ -6,6 +6,7 @@
   "scripts": {
     "bundle:api": "./bin/api.js",
     "bundle": "npm run bundle:api && browserify index.js -o bundle.js",
+    "deploy": "npm run bundle && surge . regl.party",
     "start": "budo index.js:bundle.js -P"
   },
   "browserify": {
