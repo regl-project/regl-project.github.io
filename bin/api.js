@@ -21,7 +21,7 @@ marked.setOptions({
 })
 
 var document = jsdom.defaultView.document
-var source = 'https://raw.githubusercontent.com/mikolalysenko/regl/gh-pages/API.md'
+var source = 'https://raw.githubusercontent.com/mikolalysenko/regl/d91f4bef665795f2f74f5854efcc7257ba678c54/API.md'
 var filepath = path.join(__dirname, '..', 'views', 'html')
 var counter = [0, 0, 0]
 var toc
