@@ -27,6 +27,7 @@ module.exports = function Editor (list, selection) {
   container.id = 'editor'
 
   var iframe = document.createElement('iframe')
+  iframe.id = 'iframe'
 
   css(container, {
     width: '650px', 
@@ -64,7 +65,8 @@ module.exports = function Editor (list, selection) {
     name: 'demo',
     cdn: 'http://wzrd.in',
     container: demo,
-    iframe: iframe
+    iframe: iframe,
+    iframeSandbox: ['allow-scripts', 'allow-same-origin']
   })
 
   bundler.on('bundleEnd', function (data) {
@@ -88,6 +90,7 @@ module.exports = function Editor (list, selection) {
     var path = base + name + '.js'
     request(path, function(er, response, body) {
       body = body.replace('../regl', 'regl')
+      body = body.replace(new RegExp('assets/', 'g'), window.location.origin + '/assets/')
       editor.setValue(body)
     })
     css(loading, {opacity: 0.7})
