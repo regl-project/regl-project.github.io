@@ -75,7 +75,7 @@ module.exports = function Editor (list, selection) {
   })
 
   function run () {
-    bundler.bundle(editor.getValue(), {'regl': '0.8.0'})
+    bundler.bundle(editor.getValue(), {'regl': '0.11.0'})
   }
 
   var debounced = debounce(run, 250)
@@ -86,7 +86,7 @@ module.exports = function Editor (list, selection) {
 
   function fetch (name) {
     selected = name
-    var base = 'https://raw.githubusercontent.com/mikolalysenko/regl/d91f4bef665795f2f74f5854efcc7257ba678c54/example/'
+    var base = 'https://raw.githubusercontent.com/mikolalysenko/regl/557bb2facef8a9d5408c9a23f13f6bb2bd014659/example/'
     var path = base + name + '.js'
     request(path, function(er, response, body) {
       body = body.replace('../regl', 'regl')
