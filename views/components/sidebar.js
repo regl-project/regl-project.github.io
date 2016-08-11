@@ -17,7 +17,8 @@ module.exports = function Sidebar (list, selection, onclick) {
     backgroundColor: '#151515',
     fontFamily: 'klartext_monolight',
     padding: '10px',
-    color: 'rgb(210,210,210)'
+    color: 'rgb(210,210,210)',
+    overflowY: 'scroll'
   })
 
   var heading = document.createElement('div')
