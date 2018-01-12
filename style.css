@@ -17,11 +17,16 @@ html {
 }
 
 body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0px;
 	background-color: black;
 	color: white;
 	font-family: "klartext_monolight", sans-serif;
 	font-weight: 100;
-	margin: 0px;
   font-size: 16px;
 }
 
@@ -126,7 +131,7 @@ a {
 	font-size: 170%;
 	text-align: center;
 	display:inline-block;
-	margin-right: 5px;	
+	margin-right: 5px;
   opacity: 0.8;
 }
 
@@ -214,14 +219,6 @@ a {
   transition: all 0.2s;
 }
 
-.example-selected {
-  background: rgb(40, 40, 40);
-}
-
-.example:hover {
-  background: rgb(40, 40, 40);
-}
-
 .button:hover {
   opacity: 0.9 !important;
 }
@@ -244,19 +241,19 @@ a {
 
 ::-webkit-scrollbar-track {
   background-color: none;
-} 
+}
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(120, 120, 120, 0.176); 
-} 
+  background-color: rgba(120, 120, 120, 0.176);
+}
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(120, 120, 120, 0.3); 
-} 
+  background-color: rgba(120, 120, 120, 0.3);
+}
 
 ::-webkit-scrollbar-button {
   background-color: rgb(200,200,200);
-} 
+}
 
 ::-webkit-scrollbar-corner {
   background-color: black;
@@ -291,7 +288,7 @@ a {
     font-size: 225%;
     padding-right: 20px;
     padding-left: 20px;
-  }  
+  }
 
   .about {
 	  width: 85%;

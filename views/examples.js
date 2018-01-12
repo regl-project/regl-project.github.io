@@ -1,24 +1,13 @@
-var choo = require('choo')
-var Editor = require('./components/editor')
+var html = require('choo/html')
 var Back = require('./components/back')
+var Editor = require('./components/editor')
+var editor = new Editor()
 
-module.exports = function (params, state, send) {
-  var selection = state.app.location.split('?')[1]
-  var back = Back()
-  var editor = Editor(state.examples.list, selection)
-
-  // awkward hack to prevent redrawing when loading subsscriptions
-
-  if (state.docs.content && state.comparisons.contents && Object.keys(state.comparisons.contents).length == 4) {
-    return choo.view`
+module.exports = function (state, emit) {
+  return html`
     <main>
-      ${editor}
-      ${back}
-    </main>`
-  } else {
-    return choo.view`
-    <main>
-      ${back}
-    </main>`
-  }
+      ${editor.render(state, emit, state.params.selection)}
+      ${Back()}
+    </main>
+  `
 }

@@ -1,32 +1,49 @@
-var css = require('dom-css')
+var setStyle = require('dom-css')
+var css = require('sheetify')
+var html = require('choo/html')
 
-module.exports = function Toggle () {
-  var button = document.createElement('div')
-  button.className = 'button'
-  css(button, {
-    position: 'fixed',
-    right: '10px',
-    bottom: '10px',
-    width: '50px',
-    height: '50px',
-    backgroundColor: 'rgb(40,40,40)',
-    opacity: 0.7,
-    color: 'white',
-    fontSize: '325%',
-    cursor: 'pointer',
-    letterSpacing: '-16px'
-  })
+var cssPrefix = css`
+  :host {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    width: 50px;
+    height: 50px;
+    background-color: rgb(40,40,40);
+    opacity: 0.7,;
+    color: white;
+    font-size: 325%;
+    cursor: pointer;
+    letter-spacing: -16px;
+  }
 
-  var logo = document.createElement('span')
-  logo.className = 'logo'
-  logo.innerHTML = '|||'
-  css(logo, {
-    position: 'fixed',
-    right: '17px',
-    bottom: '13px',
-    transform: 'rotate(90deg)'
-  })
-  button.appendChild(logo)
+  .logo {
+    position: fixed;
+    right: 17px;
+    bottom: 13px;
+    transform: rotate(90deg);
+  }
 
-  return button
+  .collapsed {
+    transform: rotate(0deg);
+    right: 27px;
+    bottom: 7px;
+  }
+`
+
+module.exports = function Toggle (state, emit) {
+  var logoClass = 'logo'
+  if (state.examples.isCollapsed) {
+    logoClass += ' collapsed'
+  }
+
+  return html`
+    <div class='${cssPrefix}' onclick='${toggle}'>
+      <span class='${logoClass}'>|||</span>
+    </div>
+  `
+
+  function toggle () {
+    emit('examples:toggle')
+  }
 }

@@ -1,20 +1,16 @@
 var choo = require('choo')
+var redirect = require('choo-redirect')
+var examplesStore = require('./store/examples')
 
 var app = choo()
 
-app.model(require('./models/app'))
-app.model(require('./models/docs'))
-app.model(require('./models/examples'))
-app.model(require('./models/comparisons'))
+// app.use(require('choo-devtools')())
+app.use(examplesStore)
 
-app.router(function (route) {
-  return [
-    route('/', require('./views/main')),
-    route('/api', require('./views/api')),
-    route('/comparisons', require('./views/comparisons')),
-    route('/examples', require('./views/examples'))
-  ]}
-)
+app.route('/', require('./views/home'))
+app.route('/api', require('./views/api'))
+app.route('/examples', redirect('/examples/basic'))
+app.route('/examples/:selection', require('./views/examples'))
 
 var tree = app.start({ href: false })
 document.body.appendChild(tree)

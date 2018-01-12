@@ -1,126 +1,149 @@
 var fs = require('fs')
-var choo = require('choo')
+var html = require('choo/html')
 var path = require('path')
-var css = require('dom-css')
+var setStyle = require('dom-css')
 var insertcss = require('insert-css')
-var codemirror = require('codemirror')
-var request = require('browser-request')
+var CodeMirror = require('codemirror')
 var debounce = require('lodash.debounce')
 var sandbox = require('browser-module-sandbox')
 require('codemirror/mode/javascript/javascript')
 var Sidebar = require('./sidebar')
 var Toggle = require('./toggle')
 var Loading = require('./loading')
+var css = require('sheetify')
+var examples = require('../html/examples.json')
+var Nanocomponent = require('nanocomponent')
 
-var selected = 'basic'
+var basecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'codemirror.css'))
+var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'cm-tomorrow-night.css'))
+insertcss(basecss)
+insertcss(themecss)
 
-module.exports = function Editor (list, selection) {
+var cssPrefix = css`
+  :host .editor {
+    width: 650px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: 230px;
+    font-size: 80%;
+    opacity: 0.9;
+    display: inline-block;
+  }
 
-  var basecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'codemirror.css'))
-  var themecss = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'cm-tomorrow-night.css'))
-  insertcss(basecss)
-  insertcss(themecss)
+  :host .demo {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: -1000;
+    background: black;
+    pointer-events: all;
+  }
+`
 
-  if (selection) selected = selection
+module.exports = Editor
 
-  var container = document.createElement('div')
-  container.id = 'editor'
+function Editor () {
+  if (!(this instanceof Editor)) return new Editor()
+  this.selection = null
+  this.text = null
+  this.isBundled = false
+  Nanocomponent.call(this)
+}
 
-  var iframe = document.createElement('iframe')
-  iframe.id = 'iframe'
+Editor.prototype = Object.create(Nanocomponent.prototype)
 
-  css(container, {
-    width: '650px', 
-    height: window.innerHeight, 
-    position: 'fixed',
-    top: '0',
-    right: '230px',
-    fontSize: '80%',
-    opacity: 0.9,
-    display: 'inline-block'
-  })
+Editor.prototype.update = function(state, emit, selection) {
+  const text = state.examples.text
 
-  var editor = codemirror(container, {
-    autofocus: true, 
-    mode: 'javascript', 
+  // If the fetched text is different, update CodeMirror.
+  if (text && text !== this.text) {
+    this.codeMirror.setValue(text)
+    this.text = text
+  }
+
+  // Fetch the example if it's not the same.
+  if (selection !== this.selection) {
+    emit('examples:fetch', selection)
+    this.selection = selection
+  }
+  return true
+}
+
+Editor.prototype.load = function(element) {
+  var self = this
+
+  // Create all the DOM elements
+  var container = element.querySelector('.editor')
+  var demo = element.querySelector('.demo')
+  if (!container || !demo) {
+    throw new Error('Could not select all of the elements.')
+  }
+
+  // Setup codemirror
+  var codeMirror = CodeMirror(container, {
+    autofocus: true,
+    mode: 'javascript',
     theme: 'tomorrow-night',
     lineWrapping: true
   })
+  codeMirror.on('change', debounce(
+    function run () {
+      bundler.bundle(codeMirror.getValue(), {'regl': '1.3.0'})
+    },
+    250
+  ))
+  this.codeMirror = codeMirror
 
-  var demo = document.createElement('div')
-  demo.id = 'demo'
-
-  css(demo, {
-    width: '100%',
-    height: '100%',
-    position: 'fixed',
-    left: '0',
-    top: '0',
-    zIndex: '-1000',
-    background: 'black',
-    pointerEvents: 'all'
-  })
-
+  // Setup the bundler
   var bundler = sandbox({
     name: 'demo',
     cdn: 'http://wzrd.in',
-    container: demo,
-    iframe: iframe,
+    editor: demo,
     iframeSandbox: ['allow-scripts', 'allow-same-origin']
   })
 
   bundler.on('bundleEnd', function (data) {
-    css(loading, {opacity: 0})
-    css(demo, {display: 'inherit'})
+    self.isBundled = true
   })
 
-  function run () {
-    bundler.bundle(editor.getValue(), {'regl': '0.11.0'})
+  this.emit('examples:fetch', this.selection)
+}
+
+Editor.prototype.createElement = function (state, emit, selection) {
+  if (!selection) {
+    throw new Error('An example must be selection')
   }
+  var isLoading = state.examples.isLoading || !this.isBundled
+  this.selection = selection
+  this.emit = emit
 
-  var debounced = debounce(run, 250)
+  var hideWhenLoading = isLoading
+    ? 'display: none'
+    : ''
 
-  editor.on('change', function (data) {
-    debounced()
-  })
+  var hideWhenCollapsed = state.examples.isCollapsed
+    ? 'display: none'
+    : ''
 
-  function fetch (name) {
-    selected = name
-    var base = 'https://raw.githubusercontent.com/mikolalysenko/regl/557bb2facef8a9d5408c9a23f13f6bb2bd014659/example/'
-    var path = base + name + '.js'
-    request(path, function(er, response, body) {
-      body = body.replace('../regl', 'regl')
-      body = body.replace(new RegExp('assets/', 'g'), window.location.origin + '/assets/')
-      editor.setValue(body)
-    })
-    css(loading, {opacity: 0.7})
-    css(demo, {display: 'none'})
-  }
+  hideWhenLoading = ''
+  hideWhenCollapsed = ''
 
-  var sidebar = Sidebar(list, selected, fetch)
-  var toggle = Toggle()
-  var loading = Loading()
-
-  toggle.onclick = function () {
-    if (sidebar.style.display == 'none') {
-      css(sidebar, {display: 'inherit'})
-      css(container, {display: 'inherit', pointerEvents: 'all'})
-      css(toggle.children[0], {transform: 'rotate(90deg)', right: '17px', bottom: '13px'})
-    } else {
-      css(sidebar, {display: 'none'})
-      css(container, {display: 'none', pointerEvents: 'none'})
-      css(toggle.children[0], {transform: 'rotate(0deg)', right: '27px', bottom: '7px'})
-    }
-  }
-
-  fetch(selected)
-
-  return choo.view`
-  <div>
-    ${sidebar}
-    ${toggle}
-    ${loading}
-    ${container}
-    ${demo}
-  </div>`
+  return html`
+    <div class='${cssPrefix}'>
+      <div style='${hideWhenCollapsed}'>
+        ${Sidebar(selection)}
+      </div>
+      ${Toggle(state, emit)}
+      ${Loading(isLoading)}
+      <div class='holdsDemo' style='${hideWhenLoading}'>
+        <div style='${hideWhenCollapsed}'>
+          <div class='editor'></div>
+        </div>
+        <div class='demo'></div>
+      </div>
+    </div>
+  `
 }

@@ -1,72 +1,70 @@
 var fs = require('fs')
 var path = require('path')
-var choo = require('choo')
+var html = require('choo/html')
 var back = require('./components/back')
-var css = require('dom-css')
+var domCss = require('dom-css')
 var onload = require('on-load')
-var tocHeight = '100%'
+var css = require('sheetify')
+
+var TOC_HEIGHT = '100%'
+var TOC_HTML = fs.readFileSync(path.join(__dirname, '..', 'views', 'html', 'api-toc.html'))
+var CONTENT_HTML = fs.readFileSync(path.join(__dirname, '..', 'views', 'html', 'api-content.html'))
+
+var cssPrefix = css`
+  :host .api-toc {
+    position: fixed;
+    right: 60%;
+    top: 0px;
+    font-size: 100%;
+    color: rgb(190, 190, 190);
+    width: 20%;
+    overflow-y: scroll;
+    margin: 0px 0px 30px 0px;
+    height: 100%;
+    background: rgb(30,30,30);
+    opacity: 0.9;
+    padding-left: 10px;
+  }
+
+  :host .api-content {
+    width: 55%;
+    position: fixed;
+    height: calc(100% - 60px);
+    padding: 30px;
+    top: 0px;
+    right: 0p x;
+    opacity: 0.9;
+    display: inline-block;
+    overflow: scroll;
+    background: rgb(30,30,30);
+  }
+`
 
 module.exports = function (params, state, send) {
-  var container = document.createElement('div')
-  var tocWrapper = document.createElement('div')
-  tocWrapper.className = 'toc'
-  tocWrapper.innerHTML = state.docs.toc
-  container.appendChild(tocWrapper)
+  var toc = document.createElement('div')
+  toc.className = 'api-toc'
+  toc.innerHTML = TOC_HTML
 
-  css(tocWrapper, {
-    position: 'fixed',
-    right: '60%',
-    top: '0px',
-    fontSize: '100%',
-    color: 'rgb(190, 190, 190)',
-    width: '20%',
-    overflowY: 'scroll',
-    margin: '0px 0px 30px 0px',
-    height: tocHeight,
-    background: 'rgb(30,30,30)',
-    opacity: 0.9,
-    paddingLeft: '10px'
-  })
+  var content = document.createElement('div')
+  content.className = 'api-content markdown-body'
+  content.innerHTML = CONTENT_HTML
 
-  onload(tocWrapper, function () {
-    var toc = document.querySelector('.toc')
-    tocHeight = (window.innerHeight - toc.offsetTop) + 'px'
-    toc.style.height = tocHeight
-  })
-
-  var contentWrapper = document.createElement('div')
-  contentWrapper.className = 'markdown-body'
-  contentWrapper.innerHTML = state.docs.content
-  contentWrapper.id = 'wrapper'
-  container.appendChild(contentWrapper)
-
-  css(contentWrapper, {
-    width: '55%', 
-    height: window.innerHeight - 60, 
-    position: 'fixed',
-    padding: '30px',
-    top: '0px',
-    right: '0px',
-    opacity: 0.9,
-    display: 'inline-block',
-    overflow: 'scroll',
-    background: 'rgb(30,30,30)'
-  })
-
-  return choo.view`
-  <main>
-    <div class='row' id='title'>
-      <div class='hero-medium'>
-        <h1 align='right'>api</h1>
+  return html`
+    <main class='${cssPrefix}'>
+      <div class='row' id='title'>
+        <div class='hero-medium'>
+          <h1 align='right'>api</h1>
+        </div>
+        <div class='color-block-medium green'>
+        </div>
+        <div>
+          ${toc}
+          ${content}
+        </div>
+        <div>
+          ${back()}
+        </div>
       </div>
-      <div class='color-block-medium green'>
-      </div>
-      <div>
-        ${container}
-      </div>
-      <div>
-        ${back()}
-      </div>
-    </div>
-  </main>`
+    </main>
+  `
  }

@@ -1,4 +1,6 @@
-var css = require('dom-css')
+var html = require('choo/html')
+var domCss = require('dom-css')
+var css = require('sheetify')
 var mat4 = require('gl-mat4')
 var normals = require('angle-normals')
 var sphere = require('primitive-icosphere')
@@ -6,19 +8,20 @@ var perlin = require('noisejs')
 var reindex = require('mesh-reindex')
 var unindex = require('unindex-mesh')
 
+var cssPrefix = css`
+  :host > canvas {
+    background: black;
+    pointer-events: none;
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+`
 
 module.exports = function Splash () {
   var canvas = document.createElement('canvas')
   canvas.id = 'splash'
-
-  css(canvas, {
-    background: 'black',
-    pointerEvents: 'none',
-    zIndex: '-1000',
-    position: 'absolute',
-    top: 0,
-    left: 0
-  })
 
   function fit () {
     canvas.width = window.innerWidth
@@ -29,7 +32,7 @@ module.exports = function Splash () {
 
   window.addEventListener('resize', fit, false)
 
-  var regl = require('regl')(canvas)  
+  var regl = require('regl')(canvas)
 
   var mesh = sphere(7, {
     subdivisions: 3
@@ -44,7 +47,7 @@ module.exports = function Splash () {
   var n = new perlin.Noise(Math.random())
   var dx = []
   var rnd
- 
+
   for (var x = 0; x < 200; x++) {
     dx[x] = []
     for (var y = 0; y < 200; y++) {
@@ -83,7 +86,7 @@ module.exports = function Splash () {
     uniform float time;
     varying vec2 vuv;
     varying vec3 vposition;
-    
+
     void main () {
       gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0);
     }`,
@@ -202,5 +205,9 @@ module.exports = function Splash () {
     }
   }, false)
 
-  return canvas
+  return html`
+    <div class='${cssPrefix}'>
+      ${canvas}
+    </div>
+  `
 }

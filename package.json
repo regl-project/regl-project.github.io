@@ -10,7 +10,10 @@
     "start": "budo index.js:bundle.js -P"
   },
   "browserify": {
-    "transform": "brfs"
+    "transform": [
+      "brfs",
+      "sheetify"
+    ]
   },
   "author": "freeman-lab",
   "license": "MIT",
@@ -20,7 +23,8 @@
     "browser-module-sandbox": "^1.4.5",
     "browser-request": "^0.3.3",
     "canvas-fit": "^1.5.0",
-    "choo": "^2.3.0",
+    "choo": "^6.6.1",
+    "choo-devtools": "^2.3.2",
     "codemirror": "^5.14.2",
     "dom-css": "^2.0.0",
     "element-class": "^0.2.2",
@@ -29,6 +33,7 @@
     "insert-css": "^0.2.0",
     "javascript-editor": "^1.0.3",
     "lodash.debounce": "^4.0.6",
+    "lodash.kebabcase": "^4.1.1",
     "marked": "^0.3.5",
     "mesh-reindex": "^1.0.0",
     "noisejs": "^2.1.0",
@@ -36,6 +41,7 @@
     "on-load": "^2.1.1",
     "primitive-icosphere": "^1.0.2",
     "regl": "^0.5.0",
+    "sheetify": "^6.2.0",
     "unindex-mesh": "^2.0.0"
   },
   "devDependencies": {
@@ -43,6 +49,7 @@
     "budo": "^8.3.0",
     "domify": "^1.4.0",
     "jsdom": "^9.2.1",
+    "nanocomponent": "^6.5.0",
     "request": "^2.72.0"
   }
 }
