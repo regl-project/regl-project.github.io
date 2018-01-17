@@ -36,7 +36,7 @@ module.exports = function (params, state, send) {
           <span class ='color-block-small green'></span>
         </div>
         <div class='callout'>
-        <a class='link' href='https://github.com/mikolalysenko/regl'>github</a>
+        <a class='link' href='https://github.com/regl-project/regl'>github</a>
         <span class ='color-block-small blue'></span>
         </div>
       </div>
