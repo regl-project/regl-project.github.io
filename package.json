@@ -51,6 +51,7 @@
     "domify": "^1.4.0",
     "jsdom": "^9.2.1",
     "nanocomponent": "^6.5.0",
-    "request": "^2.72.0"
+    "request": "^2.72.0",
+    "yo-yo": "^1.4.1"
   }
 }
