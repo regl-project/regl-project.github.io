@@ -3,7 +3,7 @@ var Splash = require('./components/splash')
 
 module.exports = function (params, state, send) {
   return html`
-    <main>
+    <div>
       ${Splash(params, state, send)}
       <div class='row' id='title'>
         <div class='hero'>
@@ -40,6 +40,6 @@ module.exports = function (params, state, send) {
         <span class ='color-block-small blue'></span>
         </div>
       </div>
-    </main>
+    </div>
   `
 }

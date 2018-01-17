@@ -5,9 +5,9 @@ var editor = new Editor()
 
 module.exports = function (state, emit) {
   return html`
-    <main>
+    <div>
       ${editor.render(state, emit, state.params.selection)}
       ${Back()}
-    </main>
+    </div>
   `
 }
