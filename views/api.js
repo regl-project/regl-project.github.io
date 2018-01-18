@@ -50,7 +50,7 @@ module.exports = function (params, state, send) {
   content.innerHTML = CONTENT_HTML
 
   return html`
-    <main class='${cssPrefix}'>
+    <div class='${cssPrefix}'>
       <div class='row' id='title'>
         <div class='hero-medium'>
           <h1 align='right'>api</h1>
@@ -65,6 +65,6 @@ module.exports = function (params, state, send) {
           ${back()}
         </div>
       </div>
-    </main>
+    </div>
   `
  }
