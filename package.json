@@ -7,7 +7,7 @@
     "bundle:api": "./bin/api.js",
     "bundle": "npm run bundle:api && browserify index.js -o bundle.js",
     "deploy": "npm run bundle && surge . regl.party",
-    "start": "budo --watch index.js:bundle.js -P"
+    "start": "budo index.js:bundle.js --watch -P"
   },
   "browserify": {
     "transform": [
