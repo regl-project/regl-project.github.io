@@ -20,7 +20,7 @@ insertcss(basecss)
 insertcss(themecss)
 
 var cssPrefix = css`
-  :host .editor {
+  :host .codeMirrorWrapper {
     width: 650px;
     height: 100%;
     position: fixed;
@@ -31,7 +31,7 @@ var cssPrefix = css`
     display: inline-block;
   }
 
-  :host .demo {
+  :host .sandboxWrapper {
     width: 100%;
     height: 100%;
     position: fixed;
@@ -72,18 +72,25 @@ Editor.prototype.update = function(state, emit, selection) {
   return true
 }
 
-Editor.prototype.load = function(element) {
-  var self = this
-
+Editor.prototype.setupThirdPartyLibraries = function() {
   // Create all the DOM elements
-  var container = element.querySelector('.editor')
-  var demo = element.querySelector('.demo')
-  if (!container || !demo) {
-    throw new Error('Could not select all of the elements.')
-  }
+  var codeMirrorWrapper = html`<div class='codeMirrorWrapper'></div>`
+  var sandboxWrapper = html`<div class='sandboxWrapper'></div>`
+
+  // Setup the sandbox bundler
+  var sandboxBundler = sandbox({
+    name: 'sandbox-wrapper',
+    cdn: 'http://wzrd.in',
+    container: sandboxWrapper,
+    iframeSandbox: ['allow-scripts', 'allow-same-origin']
+  })
+
+  sandboxBundler.on('bundleEnd', function (data) {
+    self.isBundled = true
+  })
 
   // Setup codemirror
-  var codeMirror = CodeMirror(container, {
+  var codeMirror = CodeMirror(codeMirrorWrapper, {
     autofocus: true,
     mode: 'javascript',
     theme: 'tomorrow-night',
@@ -91,24 +98,32 @@ Editor.prototype.load = function(element) {
   })
   codeMirror.on('change', debounce(
     function run () {
-      bundler.bundle(codeMirror.getValue(), {'regl': '1.3.0'})
+      sandboxBundler.bundle(codeMirror.getValue(), {'regl': '1.3.0'})
     },
     250
   ))
+
   this.codeMirror = codeMirror
+  this.codeMirrorWrapper = codeMirrorWrapper
+  this.sandboxBundler = sandboxBundler
+  this.sandboxWrapper = sandboxWrapper
+}
 
-  // Setup the bundler
-  var bundler = sandbox({
-    name: 'demo',
-    cdn: 'http://wzrd.in',
-    editor: demo,
-    iframeSandbox: ['allow-scripts', 'allow-same-origin']
-  })
+Editor.prototype.getCodeMirrorWrapper = function() {
+  if (!this.codeMirrorWrapper) {
+    this.setupThirdPartyLibraries()
+  }
+  return this.codeMirrorWrapper
+}
 
-  bundler.on('bundleEnd', function (data) {
-    self.isBundled = true
-  })
+Editor.prototype.getSandboxWrapper = function() {
+  if (!this.sandboxWrapper) {
+    this.setupThirdPartyLibraries()
+  }
+  return this.sandboxWrapper
+}
 
+Editor.prototype.load = function() {
   this.emit('examples:fetch', this.selection)
 }
 
@@ -127,6 +142,8 @@ Editor.prototype.createElement = function (state, emit, selection) {
   var hideWhenCollapsed = state.examples.isCollapsed
     ? 'display: none'
     : ''
+  var codeMirrorWrapper = this.getCodeMirrorWrapper()
+  var sandboxWrapper = this.getSandboxWrapper()
 
   hideWhenLoading = ''
   hideWhenCollapsed = ''
@@ -138,11 +155,11 @@ Editor.prototype.createElement = function (state, emit, selection) {
       </div>
       ${Toggle(state, emit)}
       ${Loading(isLoading)}
-      <div class='holdsDemo' style='${hideWhenLoading}'>
+      <div style='${hideWhenLoading}'>
         <div style='${hideWhenCollapsed}'>
-          <div class='editor'></div>
+          ${codeMirrorWrapper}
         </div>
-        <div class='demo'></div>
+        ${sandboxWrapper}
       </div>
     </div>
   `
