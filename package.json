@@ -12,7 +12,8 @@
   "browserify": {
     "transform": [
       "brfs",
-      "sheetify"
+      "sheetify",
+      "envify"
     ]
   },
   "author": "freeman-lab",
@@ -29,6 +30,7 @@
     "codemirror": "^5.14.2",
     "dom-css": "^2.0.0",
     "element-class": "^0.2.2",
+    "envify": "^4.1.0",
     "gl-mat4": "^1.1.4",
     "highlight.js": "^9.4.0",
     "insert-css": "^0.2.0",
