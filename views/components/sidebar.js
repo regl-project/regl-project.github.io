@@ -48,8 +48,6 @@ const cssPrefix = css`
 `
 
 module.exports = function Sidebar (selection, onclick) {
-  console.log('Sidebar')
-
   return html`
     <div class='${cssPrefix}'>
       <div class='heading'>examples</div>

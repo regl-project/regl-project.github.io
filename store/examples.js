@@ -1,4 +1,5 @@
 var request = require('browser-request')
+var urls = require('../utils/urls')
 
 module.exports = examplesStore
 
@@ -16,8 +17,7 @@ function examplesStore (state, emitter) {
     state.examples.text
     emitter.emit('render')
 
-    // TODO - .env
-    var base = 'http://localhost:8080/example/'
+    var base = urls.examplesBaseUrl
     var path = base + name + '.js'
 
     request(path, function(er, response, text) {
