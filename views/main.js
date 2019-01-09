@@ -31,7 +31,7 @@ module.exports = function (params, state, send) {
     </div>
     <div class='row'>
       <div class='callout'>
-        <a class='link' href='/examples'>examples</a>
+        <a class='link' href='https://regl-project.github.io/regl/www/gallery.html'>examples</a>
         <span class ='color-block-small orange'></span>
       </div>
       <div class='callout'>
