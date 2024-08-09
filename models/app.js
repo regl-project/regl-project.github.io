@@ -3,6 +3,10 @@ module.exports = {
   state: {},
   subscriptions: [
     function catchLinks (send) {
+      return;
+
+      // Disable links and redirect to static pages
+      /*
       window.onclick = function (e) {
         var node = (function traverse (node) {
           if (!node) return
@@ -25,6 +29,7 @@ module.exports = {
           window.scrollTo(0, el.offsetTop)
         }
       }
+      */
     }
   ]
 }

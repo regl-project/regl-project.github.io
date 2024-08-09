@@ -37,6 +37,10 @@ module.exports = {
   state: {},
   subscriptions: [
     function catchLinks (send) {
+      return;
+
+      // Disable links and redirect to static pages
+      /*
       window.onclick = function (e) {
         var node = (function traverse (node) {
           if (!node) return
@@ -59,6 +63,7 @@ module.exports = {
           window.scrollTo(0, el.offsetTop)
         }
       }
+      */
     }
   ]
 }
@@ -60869,7 +60874,7 @@ module.exports = function (params, state, send) {
         <span class ='color-block-small orange'></span>
       </div>
       <div class='callout'>
-        <a class='link' href='/api'>api</a>
+        <a class='link' href='https://github.com/regl-project/regl/blob/master/API.md'>api</a>
         <span class ='color-block-small green'></span>
       </div>
       <div class='callout'>
