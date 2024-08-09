@@ -28,22 +28,22 @@
 <h2 id="commands">Commands</h2>
 <p><em>Draw commands</em> are the fundamental abstraction in <code>regl</code>.  A draw command wraps up all of the WebGL state associated with a draw call (either <code>drawArrays</code> or <code>drawElements</code>) and packages it into a single reusable function. For example, here is a command that draws a triangle,</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> drawTriangle = regl({
-  frag: <span class="hljs-string">`
+  <span class="hljs-attr">frag</span>: <span class="hljs-string">`
   void main() {
     gl_FragColor = vec4(1, 0, 0, 1);
   }`</span>,
 
-  vert: <span class="hljs-string">`
+  <span class="hljs-attr">vert</span>: <span class="hljs-string">`
   attribute vec2 position;
   void main() {
     gl_Position = vec4(position, 0, 1);
   }`</span>,
 
-  attributes: {
-    position: [[<span class="hljs-number">0</span>, <span class="hljs-number">-1</span>], [<span class="hljs-number">-1</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]]
+  <span class="hljs-attr">attributes</span>: {
+    <span class="hljs-attr">position</span>: [[<span class="hljs-number">0</span>, <span class="hljs-number">-1</span>], [<span class="hljs-number">-1</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]]
   },
 
-  count: <span class="hljs-number">3</span>
+  <span class="hljs-attr">count</span>: <span class="hljs-number">3</span>
 })
 </code></pre>
 <p>To execute a command you call it just like you would any function,</p>
@@ -89,12 +89,12 @@ command(props, <span class="hljs-function"><span class="hljs-keyword">function</
 <p>If you are familiar with Facebook's <a href="https://github.com/facebook/react">react</a>, these are roughly analogous to a component's <a href="https://facebook.github.io/react/docs/context.html">context</a>, <a href="https://facebook.github.io/react/docs/transferring-props.html">props</a> and <a href="https://facebook.github.io/react/docs/component-api.html#setstate">state</a> variables respectively.</p>
 <h4 id="example">Example</h4>
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> drawSpinningStretchyTriangle = regl({
-  frag: <span class="hljs-string">`
+  <span class="hljs-attr">frag</span>: <span class="hljs-string">`
   void main() {
     gl_FragColor = vec4(1, 0, 0, 1);
   }`</span>,
 
-  vert: <span class="hljs-string">`
+  <span class="hljs-attr">vert</span>: <span class="hljs-string">`
   attribute vec2 position;
   uniform float angle, scale, width, height;
   void main() {
@@ -106,11 +106,11 @@ command(props, <span class="hljs-function"><span class="hljs-keyword">function</
       1.0);
   }`</span>,
 
-  attributes: {
-    position: [[<span class="hljs-number">0</span>, <span class="hljs-number">-1</span>], [<span class="hljs-number">-1</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]]
+  <span class="hljs-attr">attributes</span>: {
+    <span class="hljs-attr">position</span>: [[<span class="hljs-number">0</span>, <span class="hljs-number">-1</span>], [<span class="hljs-number">-1</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>]]
   },
 
-  uniforms: {
+  <span class="hljs-attr">uniforms</span>: {
     <span class="hljs-comment">//</span>
     <span class="hljs-comment">// Dynamic properties can be functions.  Each function gets passed:</span>
     <span class="hljs-comment">//</span>
@@ -118,14 +118,14 @@ command(props, <span class="hljs-function"><span class="hljs-keyword">function</
     <span class="hljs-comment">//  * props: which are user specified arguments</span>
     <span class="hljs-comment">//  * batchId: which is the index of the draw command in the batch</span>
     <span class="hljs-comment">//</span>
-    angle: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context, props, batchId</span>) </span>{
+    <span class="hljs-attr">angle</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context, props, batchId</span>) </span>{
       <span class="hljs-keyword">return</span> args.speed * stats.count + <span class="hljs-number">0.01</span> * batchId
     },
 
     <span class="hljs-comment">// As a shortcut/optimization we can also just read out a property</span>
     <span class="hljs-comment">// from the args.  For example, this</span>
     <span class="hljs-comment">//</span>
-    scale: regl.prop(<span class="hljs-string">'scale'</span>),
+    <span class="hljs-attr">scale</span>: regl.prop(<span class="hljs-string">'scale'</span>),
     <span class="hljs-comment">//</span>
     <span class="hljs-comment">// is semantically equivalent to</span>
     <span class="hljs-comment">//</span>
@@ -135,8 +135,8 @@ command(props, <span class="hljs-function"><span class="hljs-keyword">function</
     <span class="hljs-comment">//</span>
 
     <span class="hljs-comment">// Similarly there are shortcuts for accessing context variables</span>
-    width: regl.context(<span class="hljs-string">'viewportWidth'</span>),
-    height: regl.context(<span class="hljs-string">'viewportHeight'</span>),
+    <span class="hljs-attr">width</span>: regl.context(<span class="hljs-string">'viewportWidth'</span>),
+    <span class="hljs-attr">height</span>: regl.context(<span class="hljs-string">'viewportHeight'</span>),
     <span class="hljs-comment">//</span>
     <span class="hljs-comment">// which is the same as writing:</span>
     <span class="hljs-comment">//</span>
@@ -146,29 +146,29 @@ command(props, <span class="hljs-function"><span class="hljs-keyword">function</
     <span class="hljs-comment">//</span>
   },
 
-  count: <span class="hljs-number">3</span>
+  <span class="hljs-attr">count</span>: <span class="hljs-number">3</span>
 })
 </code></pre>
 <p>To execute a draw command with dynamic arguments we pass it a configuration object as the first argument,</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// Draws one spinning triangle</span>
 drawSpinningStretchyTriangle({
-  scale: <span class="hljs-number">0.5</span>,
-  speed: <span class="hljs-number">2</span>
+  <span class="hljs-attr">scale</span>: <span class="hljs-number">0.5</span>,
+  <span class="hljs-attr">speed</span>: <span class="hljs-number">2</span>
 })
 
 <span class="hljs-comment">// Draws multiple spinning triangles</span>
 drawSpinningStretchyTriangle([
   { <span class="hljs-comment">// batchId 0</span>
-    scale: <span class="hljs-number">1</span>,
-    speed: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">scale</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">speed</span>: <span class="hljs-number">1</span>,
   },
   { <span class="hljs-comment">// batchId 1</span>
-    scale: <span class="hljs-number">2</span>,
-    speed: <span class="hljs-number">0.1</span>,
+    <span class="hljs-attr">scale</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">speed</span>: <span class="hljs-number">0.1</span>,
   },
   { <span class="hljs-comment">// batchId 2</span>
-    scale: <span class="hljs-number">0.25</span>,
-    speed: <span class="hljs-number">3</span>
+    <span class="hljs-attr">scale</span>: <span class="hljs-number">0.25</span>,
+    <span class="hljs-attr">speed</span>: <span class="hljs-number">3</span>
   }
 ])
 </code></pre>
@@ -227,8 +227,8 @@ drawSpinningStretchyTriangle([
 <p>You can define context variables in the <code>context</code> block of a command.  For example, here is how you can use context variables to set up a camera:</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// This scoped command sets up the camera parameters</span>
 <span class="hljs-keyword">var</span> setupCamera = regl({
-  context: {
-    projection: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
+  <span class="hljs-attr">context</span>: {
+    <span class="hljs-attr">projection</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
       <span class="hljs-keyword">return</span> mat4.perspective([],
         <span class="hljs-built_in">Math</span>.PI / <span class="hljs-number">4</span>,
         context.viewportWidth / context.viewportHeight,
@@ -236,22 +236,22 @@ drawSpinningStretchyTriangle([
         <span class="hljs-number">1000.0</span>)
     },
 
-    view: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context, props</span>) </span>{
+    <span class="hljs-attr">view</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context, props</span>) </span>{
       <span class="hljs-keyword">return</span> mat4.lookAt([],
         props.eye,
         props.target,
         [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>])
     },
 
-    eye: regl.props(<span class="hljs-string">'eye'</span>)
+    <span class="hljs-attr">eye</span>: regl.props(<span class="hljs-string">'eye'</span>)
   },
 
-  uniforms: {
-    view: regl.context(<span class="hljs-string">'view'</span>),
-    invView: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
+  <span class="hljs-attr">uniforms</span>: {
+    <span class="hljs-attr">view</span>: regl.context(<span class="hljs-string">'view'</span>),
+    <span class="hljs-attr">invView</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) </span>{
       <span class="hljs-keyword">return</span> mat4.inverse([], context.view)
     },
-    projection: regl.context(<span class="hljs-string">'projection'</span>)
+    <span class="hljs-attr">projection</span>: regl.context(<span class="hljs-string">'projection'</span>)
   }
 })
 
@@ -259,8 +259,8 @@ drawSpinningStretchyTriangle([
 
 <span class="hljs-comment">// In the render function:</span>
 setupCamera({
-  eye: [<span class="hljs-number">10</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
-  target: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
+  <span class="hljs-attr">eye</span>: [<span class="hljs-number">10</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+  <span class="hljs-attr">target</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
 }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 
   <span class="hljs-comment">// draw stuff</span>
@@ -268,7 +268,7 @@ setupCamera({
 </code></pre>
 <h4 id="props">Props</h4>
 <p>The most common way to pass data into regl is via props.  The props for a render command are declared</p>
-<h4 id="-this-"><code>this</code></h4>
+<h4 id="this"><code>this</code></h4>
 <p>While <code>regl</code> strives to provide a stateless API, there are a few cases where it can be useful to cache state locally to a specific command.  One way to achieve this is to use objects.  When a regl command is executed as a member function of an object, the <code>this</code> parameter is set to the object on which it was called and is passed to all computed parameters. For example, this shows how to use regl to create a simple reusable mesh object,</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// First we create a constructor</span>
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Mesh</span> (<span class="hljs-params">center, {positions, cells}</span>) </span>{
@@ -279,21 +279,21 @@ setupCamera({
 
 <span class="hljs-comment">// Then we assign regl commands directly to the prototype of the class</span>
 Mesh.prototype.draw = regl({
-  vert: <span class="hljs-string">`
+  <span class="hljs-attr">vert</span>: <span class="hljs-string">`
   uniform mat4 projection, view, model;
   attribute vec3 position;
   void main () {
     gl_Position = projection * view * model * vec4(position, 1);
   }`</span>,
 
-  frag: <span class="hljs-string">`
+  <span class="hljs-attr">frag</span>: <span class="hljs-string">`
   void main () {
     gl_FragColor = vec4(1, 0, 0, 1);
   }`</span>,
 
-  uniforms: {
+  <span class="hljs-attr">uniforms</span>: {
     <span class="hljs-comment">// dynamic properties are invoked with the same `this` as the command</span>
-    model: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) =&gt; </span>{
+    <span class="hljs-attr">model</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) =&gt; </span>{
       <span class="hljs-keyword">var</span> c = <span class="hljs-keyword">this</span>.center
       <span class="hljs-keyword">return</span> [
         <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,
@@ -303,17 +303,17 @@ Mesh.prototype.draw = regl({
       ]
     },
 
-    view: regl.prop(<span class="hljs-string">'view'</span>),
-    projection: regl.prop(<span class="hljs-string">'projection'</span>)
+    <span class="hljs-attr">view</span>: regl.prop(<span class="hljs-string">'view'</span>),
+    <span class="hljs-attr">projection</span>: regl.prop(<span class="hljs-string">'projection'</span>)
   }
 
-  attributes: {
+  <span class="hljs-attr">attributes</span>: {
     <span class="hljs-comment">// here we are using 'positions' proeprty of the mesh</span>
-    position: regl.this(<span class="hljs-string">'positions'</span>)
+    <span class="hljs-attr">position</span>: regl.this(<span class="hljs-string">'positions'</span>)
   },
 
   <span class="hljs-comment">// and same for the cells</span>
-  elements: regl.this(<span class="hljs-string">'cells'</span>)
+  <span class="hljs-attr">elements</span>: regl.this(<span class="hljs-string">'cells'</span>)
 })
 </code></pre>
 <p>Once defined, we could then use these mesh objects as follows:</p>
@@ -326,13 +326,13 @@ Mesh.prototype.draw = regl({
 
 <span class="hljs-comment">// Now draw meshes:</span>
 bunnyMesh.draw({
-  view: view,
-  projection: projection
+  <span class="hljs-attr">view</span>: view,
+  <span class="hljs-attr">projection</span>: projection
 })
 
 teapotMesh.draw({
-  view: view,
-  projection: projection
+  <span class="hljs-attr">view</span>: view,
+  <span class="hljs-attr">projection</span>: projection
 })
 </code></pre>
 <hr>
@@ -344,12 +344,12 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  vert: <span class="hljs-string">`
+  <span class="hljs-attr">vert</span>: <span class="hljs-string">`
   void main() {
     gl_Position = vec4(0, 0, 0, 1);
   }`</span>,
 
-  frag: <span class="hljs-string">`
+  <span class="hljs-attr">frag</span>: <span class="hljs-string">`
   void main() {
     gl_FragColor = vec4(1, 0, 1, 1);
   }`</span>,
@@ -391,7 +391,7 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  vert: <span class="hljs-string">`
+  <span class="hljs-attr">vert</span>: <span class="hljs-string">`
   struct SomeStruct {
     float value;
   };
@@ -404,9 +404,9 @@ teapotMesh.draw({
     gl_Position = vec4(1, 0, 0, 1);
   }`</span>,
 
-  uniforms: {
-    someUniform: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
-    anotherUniform: regl.prop(<span class="hljs-string">'myProp'</span>),
+  <span class="hljs-attr">uniforms</span>: {
+    <span class="hljs-attr">someUniform</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+    <span class="hljs-attr">anotherUniform</span>: regl.prop(<span class="hljs-string">'myProp'</span>),
     <span class="hljs-string">'nested.value'</span>, <span class="hljs-number">5.3</span>
   },
 
@@ -428,30 +428,30 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  attributes: {
+  <span class="hljs-attr">attributes</span>: {
     <span class="hljs-comment">// Attributes can be declared explicitly</span>
-    normals: {
-      buffer: regl.buffer([
+    <span class="hljs-attr">normals</span>: {
+      <span class="hljs-attr">buffer</span>: regl.buffer([
         <span class="hljs-comment">// ...</span>
       ]),
-      offset: <span class="hljs-number">0</span>,
-      stride: <span class="hljs-number">12</span>,
-      normalized: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">offset</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">stride</span>: <span class="hljs-number">12</span>,
+      <span class="hljs-attr">normalized</span>: <span class="hljs-literal">false</span>,
 
       <span class="hljs-comment">// divisor is only used if instancing is enabled</span>
-      divisor: <span class="hljs-number">0</span>
+      <span class="hljs-attr">divisor</span>: <span class="hljs-number">0</span>
     },
 
     <span class="hljs-comment">// A regl.buffer or the arguments to regl.buffer may also be specified</span>
-    position: [
+    <span class="hljs-attr">position</span>: [
       <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>,
       <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>,
       ...
     ],
 
     <span class="hljs-comment">// Finally, attributes may be initialized with a constant value</span>
-    color: {
-      constant: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]
+    <span class="hljs-attr">color</span>: {
+      <span class="hljs-attr">constant</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]
     }
   },
 
@@ -521,9 +521,9 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  primitive: <span class="hljs-string">'triangles'</span>,
-  offset: <span class="hljs-number">0</span>,
-  count: <span class="hljs-number">6</span>
+  <span class="hljs-attr">primitive</span>: <span class="hljs-string">'triangles'</span>,
+  <span class="hljs-attr">offset</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">count</span>: <span class="hljs-number">6</span>
 })
 </code></pre>
 <table>
@@ -583,7 +583,7 @@ teapotMesh.draw({
 </tr>
 <tr>
 <td><code>'lines'</code></td>
-<td><code>gl.LINES</code></td>
+<td>gl.LINES`</td>
 </tr>
 <tr>
 <td><code>'line strip'</code></td>
@@ -618,7 +618,7 @@ teapotMesh.draw({
 <h4 id="render-target">Render target</h4>
 <p>A <code>regl.framebuffer</code> object may also be specified to allow for rendering to offscreen locations.</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
-  framebuffer: fbo
+  <span class="hljs-attr">framebuffer</span>: fbo
 })
 </code></pre>
 <p><strong>Notes</strong></p>
@@ -637,11 +637,11 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  depth: {
-    enable: <span class="hljs-literal">true</span>,
-    mask: <span class="hljs-literal">true</span>,
-    func: <span class="hljs-string">'less'</span>,
-    range: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+  <span class="hljs-attr">depth</span>: {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">mask</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">func</span>: <span class="hljs-string">'less'</span>,
+    <span class="hljs-attr">range</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
   },
 
   <span class="hljs-comment">// ..</span>
@@ -736,19 +736,19 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  blend: {
-    enable: <span class="hljs-literal">true</span>,
-    func: {
-      srcRGB: <span class="hljs-string">'src alpha'</span>,
-      srcAlpha: <span class="hljs-number">1</span>,
-      dstRGB: <span class="hljs-string">'one minus src alpha'</span>,
-      dstAlpha: <span class="hljs-number">1</span>
+  <span class="hljs-attr">blend</span>: {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">func</span>: {
+      <span class="hljs-attr">srcRGB</span>: <span class="hljs-string">'src alpha'</span>,
+      <span class="hljs-attr">srcAlpha</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">dstRGB</span>: <span class="hljs-string">'one minus src alpha'</span>,
+      <span class="hljs-attr">dstAlpha</span>: <span class="hljs-number">1</span>
     },
-    equation: {
-      rgb: <span class="hljs-string">'add'</span>,
-      alpha: <span class="hljs-string">'add'</span>
+    <span class="hljs-attr">equation</span>: {
+      <span class="hljs-attr">rgb</span>: <span class="hljs-string">'add'</span>,
+      <span class="hljs-attr">alpha</span>: <span class="hljs-string">'add'</span>
     },
-    color: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
+    <span class="hljs-attr">color</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
   },
 
   <span class="hljs-comment">// ...</span>
@@ -907,23 +907,23 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  stencil: {
-    enable: <span class="hljs-literal">true</span>,
-    mask: <span class="hljs-number">0xff</span>,
-    func: {
-      cmp: <span class="hljs-string">'&lt;'</span>,
-      ref: <span class="hljs-number">0</span>,
-      mask: <span class="hljs-number">0xff</span>
+  <span class="hljs-attr">stencil</span>: {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">mask</span>: <span class="hljs-number">0xff</span>,
+    <span class="hljs-attr">func</span>: {
+      <span class="hljs-attr">cmp</span>: <span class="hljs-string">'&lt;'</span>,
+      <span class="hljs-attr">ref</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">mask</span>: <span class="hljs-number">0xff</span>
     },
-    opFront: {
-      fail: <span class="hljs-string">'keep'</span>,
-      zfail: <span class="hljs-string">'keep'</span>,
-      pass: <span class="hljs-string">'keep'</span>
+    <span class="hljs-attr">opFront</span>: {
+      <span class="hljs-attr">fail</span>: <span class="hljs-string">'keep'</span>,
+      <span class="hljs-attr">zfail</span>: <span class="hljs-string">'keep'</span>,
+      <span class="hljs-attr">pass</span>: <span class="hljs-string">'keep'</span>
     },
-    opBack: {
-      fail: <span class="hljs-string">'keep'</span>,
-      zfail: <span class="hljs-string">'keep'</span>,
-      pass: <span class="hljs-string">'keep'</span>
+    <span class="hljs-attr">opBack</span>: {
+      <span class="hljs-attr">fail</span>: <span class="hljs-string">'keep'</span>,
+      <span class="hljs-attr">zfail</span>: <span class="hljs-string">'keep'</span>,
+      <span class="hljs-attr">pass</span>: <span class="hljs-string">'keep'</span>
     }
   },
 
@@ -1081,11 +1081,11 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  polygonOffset: {
-    enable: <span class="hljs-literal">true</span>,
-    offset: {
-      factor: <span class="hljs-number">1</span>,
-      units: <span class="hljs-number">0</span>
+  <span class="hljs-attr">polygonOffset</span>: {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">offset</span>: {
+      <span class="hljs-attr">factor</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">units</span>: <span class="hljs-number">0</span>
     }
   }
 
@@ -1123,9 +1123,9 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  cull: {
-    enable: <span class="hljs-literal">true</span>,
-    face: <span class="hljs-string">'back'</span>
+  <span class="hljs-attr">cull</span>: {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">face</span>: <span class="hljs-string">'back'</span>
   },
 
   <span class="hljs-comment">// ...</span>
@@ -1184,7 +1184,7 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  frontFace: <span class="hljs-string">'cw'</span>,
+  <span class="hljs-attr">frontFace</span>: <span class="hljs-string">'cw'</span>,
 
   <span class="hljs-comment">// ...</span>
 })
@@ -1237,7 +1237,7 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  dither: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">dither</span>: <span class="hljs-literal">true</span>,
 
   <span class="hljs-comment">// ...</span>
 })
@@ -1264,7 +1264,7 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  lineWidth: <span class="hljs-number">4</span>,
+  <span class="hljs-attr">lineWidth</span>: <span class="hljs-number">4</span>,
 
   <span class="hljs-comment">// ...</span>
 })
@@ -1295,7 +1295,7 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  colorMask: [<span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>, <span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>],
+  <span class="hljs-attr">colorMask</span>: [<span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>, <span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>],
 
   <span class="hljs-comment">// ...</span>
 })
@@ -1326,12 +1326,12 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  sample: {
-    enable: <span class="hljs-literal">true</span>,
-    alpha: <span class="hljs-literal">false</span>,
-    coverage: {
-      value: <span class="hljs-number">1</span>,
-      invert: <span class="hljs-literal">false</span>
+  <span class="hljs-attr">sample</span>: {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">alpha</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">value</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">invert</span>: <span class="hljs-literal">false</span>
     }
   },
 
@@ -1374,13 +1374,13 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  scissor: {
-    enable: <span class="hljs-literal">true</span>,
-    box: {
-      x: <span class="hljs-number">10</span>,
-      y: <span class="hljs-number">20</span>,
-      w: <span class="hljs-number">100</span>,
-      h: <span class="hljs-number">100</span>
+  <span class="hljs-attr">scissor</span>: {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">box</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">10</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">20</span>,
+      <span class="hljs-attr">w</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">h</span>: <span class="hljs-number">100</span>
     }
   }
 
@@ -1428,11 +1428,11 @@ teapotMesh.draw({
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> command = regl({
   <span class="hljs-comment">// ...</span>
 
-  viewport: {
-    x: <span class="hljs-number">5</span>,
-    y: <span class="hljs-number">10</span>,
-    w: <span class="hljs-number">100</span>,
-    h: <span class="hljs-number">50</span>
+  <span class="hljs-attr">viewport</span>: {
+    <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">w</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">h</span>: <span class="hljs-number">50</span>
   }
 
   <span class="hljs-comment">// ...</span>
@@ -1478,8 +1478,8 @@ teapotMesh.draw({
 
 <span class="hljs-comment">// A streaming buffer of bytes</span>
 <span class="hljs-keyword">var</span> streamBuffer = regl.buffer({
-  usage: <span class="hljs-string">'stream'</span>,
-  data: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>([<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>, <span class="hljs-number">10</span>])
+  <span class="hljs-attr">usage</span>: <span class="hljs-string">'stream'</span>,
+  <span class="hljs-attr">data</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>([<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>, <span class="hljs-number">10</span>])
 })
 
 <span class="hljs-comment">// An unpacked buffer of position data</span>
@@ -1551,7 +1551,7 @@ teapotMesh.draw({
 
 <span class="hljs-comment">// Now reinitialize myBuffer</span>
 myBuffer({
-  data: [
+  <span class="hljs-attr">data</span>: [
     <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>
   ]
 })
@@ -1566,9 +1566,9 @@ myBuffer({
 We can also update a portion of the buffer using the <code>subdata</code> method.  This can be useful if you are dealing with frequently changing or streaming vertex data.  Here is an example:</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// First we preallocate a buffer with 100 bytes of data</span>
 <span class="hljs-keyword">var</span> myBuffer = regl.buffer({
-  usage: <span class="hljs-string">'dynamic'</span>,  <span class="hljs-comment">// give the WebGL driver a hint that this buffer may change</span>
-  type: <span class="hljs-string">'float'</span>,
-  length: <span class="hljs-number">100</span>
+  <span class="hljs-attr">usage</span>: <span class="hljs-string">'dynamic'</span>,  <span class="hljs-comment">// give the WebGL driver a hint that this buffer may change</span>
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'float'</span>,
+  <span class="hljs-attr">length</span>: <span class="hljs-number">100</span>
 })
 
 <span class="hljs-comment">// Now we initialize the head of the buffer with the following data</span>
@@ -1613,9 +1613,9 @@ myBuffer.destroy()
 ])
 
 <span class="hljs-keyword">var</span> starElements = regl.elements({
-  primitive: <span class="hljs-string">'line loop'</span>,
-  count: <span class="hljs-number">5</span>,
-  data: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>([<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>])
+  <span class="hljs-attr">primitive</span>: <span class="hljs-string">'line loop'</span>,
+  <span class="hljs-attr">count</span>: <span class="hljs-number">5</span>,
+  <span class="hljs-attr">data</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>([<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>])
 })
 </code></pre>
 <table>
@@ -1696,7 +1696,7 @@ myBuffer.destroy()
 </tr>
 <tr>
 <td><code>'lines'</code></td>
-<td><code>gl.LINES</code></td>
+<td>gl.LINES`</td>
 </tr>
 <tr>
 <td><code>'line strip'</code></td>
@@ -1737,7 +1737,7 @@ myBuffer.destroy()
 
 <span class="hljs-comment">// Then we update it by calling it directly</span>
 myElements({
-  data: [
+  <span class="hljs-attr">data</span>: [
     [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
     [<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>]
   ]
@@ -1751,11 +1751,11 @@ myElements({
 <p>Again like buffers it is possible to preallocate an element buffer and update regions of the elements using the <code>subdata</code> command.</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// First we preallocate the element buffer</span>
 <span class="hljs-keyword">var</span> myElements = regl.elements({
-  primitive: <span class="hljs-string">'triangles'</span>,
-  usage: <span class="hljs-string">'dynamic'</span>,
-  type: <span class="hljs-string">'uint16'</span>,
-  length: <span class="hljs-number">4096</span>,
-  count: <span class="hljs-number">0</span>
+  <span class="hljs-attr">primitive</span>: <span class="hljs-string">'triangles'</span>,
+  <span class="hljs-attr">usage</span>: <span class="hljs-string">'dynamic'</span>,
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'uint16'</span>,
+  <span class="hljs-attr">length</span>: <span class="hljs-number">4096</span>,
+  <span class="hljs-attr">count</span>: <span class="hljs-number">0</span>
 })
 
 <span class="hljs-comment">// Then we can update into ranges of the element buffer using subdata</span>
@@ -1785,14 +1785,14 @@ myElements.destroy()
 <p>There are many ways to upload data to a texture in WebGL.  As with drawing commands, regl consolidates all of these crazy configuration parameters into one function.  Here are some examples of how to create a texture,</p>
 <pre><code class="lang-javascript"><span class="hljs-comment">// From size parameters</span>
 <span class="hljs-keyword">var</span> emptyTexture = regl.texture({
-  shape: [<span class="hljs-number">16</span>, <span class="hljs-number">16</span>]
+  <span class="hljs-attr">shape</span>: [<span class="hljs-number">16</span>, <span class="hljs-number">16</span>]
 })
 
 <span class="hljs-comment">// From a flat array</span>
 <span class="hljs-keyword">var</span> typedArrayTexture = regl.texture({
-  width: <span class="hljs-number">2</span>,
-  height: <span class="hljs-number">2</span>,
-  data: [
+  <span class="hljs-attr">width</span>: <span class="hljs-number">2</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">2</span>,
+  <span class="hljs-attr">data</span>: [
     <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,
     <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>
   ]
@@ -1809,7 +1809,7 @@ myElements.destroy()
 
 <span class="hljs-comment">// Manual mipmap specification</span>
 <span class="hljs-keyword">var</span> mipmapTexture = regl.texture({
-  minFilter: <span class="hljs-string">'mipmap'</span>
+  <span class="hljs-attr">minFilter</span>: <span class="hljs-string">'mipmap'</span>
 })
 
 <span class="hljs-comment">// From an image element</span>
@@ -1829,11 +1829,11 @@ image.src = <span class="hljs-string">'http://mydomain.com/myimage.png'</span>
 
 <span class="hljs-comment">// From the pixels in the current frame buffer</span>
 <span class="hljs-keyword">var</span> copyPixels = regl.texture({
-  x: <span class="hljs-number">5</span>,
-  y: <span class="hljs-number">1</span>,
-  width: <span class="hljs-number">10</span>,
-  height: <span class="hljs-number">10</span>,
-  copy: <span class="hljs-literal">true</span>
+  <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>,
+  <span class="hljs-attr">y</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">width</span>: <span class="hljs-number">10</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">10</span>,
+  <span class="hljs-attr">copy</span>: <span class="hljs-literal">true</span>
 })
 </code></pre>
 <p>A data source from an image can be one of the following types:</p>
@@ -2342,8 +2342,8 @@ image.src = <span class="hljs-string">'http://mydomain.com/myimage.png'</span>
 
 <span class="hljs-comment">// Then we can reinitialize it</span>
 myTexture({
-  width: <span class="hljs-number">10</span>,
-  height: <span class="hljs-number">10</span>
+  <span class="hljs-attr">width</span>: <span class="hljs-number">10</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">10</span>
 })
 </code></pre>
 <p>Doing this lets you defer texture construction or reuse texture objects.</p>
@@ -2363,9 +2363,9 @@ myTexture({
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> myTexture = regl.texture(<span class="hljs-number">4</span>, <span class="hljs-number">4</span>)
 
 myTexture.subimage({
-  width: <span class="hljs-number">1</span>,
-  height: <span class="hljs-number">1</span>,
-  data: [<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>]
+  <span class="hljs-attr">width</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">data</span>: [<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>]
 }, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
 </code></pre>
 <p>For textures, <code>subimage</code> takes 4 arguments:</p>
@@ -2414,8 +2414,8 @@ myTexture.destroy()
 
 <span class="hljs-comment">// Or we can initialize each face using an array</span>
 <span class="hljs-keyword">const</span> anotherCubeMap = regl.cube({
-  radius: <span class="hljs-number">4</span>,
-  faces: [
+  <span class="hljs-attr">radius</span>: <span class="hljs-number">4</span>,
+  <span class="hljs-attr">faces</span>: [
     [
       <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>,
       <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>
@@ -2460,9 +2460,9 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <h3 id="render-buffers">Render buffers</h3>
 <h4 id="constructor-4">Constructor</h4>
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> rb = regl.renderbuffer({
-  width: <span class="hljs-number">16</span>,
-  height: <span class="hljs-number">16</span>,
-  format: <span class="hljs-string">'rgba4'</span>
+  <span class="hljs-attr">width</span>: <span class="hljs-number">16</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">16</span>,
+  <span class="hljs-attr">format</span>: <span class="hljs-string">'rgba4'</span>
 })
 </code></pre>
 <table>
@@ -2546,10 +2546,10 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <h4 id="constructor-5">Constructor</h4>
 <p>Example,</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">var</span> fbo = regl.framebuffer({
-  width: <span class="hljs-number">256</span>,
-  height: <span class="hljs-number">256</span>,
-  depth: <span class="hljs-literal">true</span>,
-  stencil: <span class="hljs-literal">true</span>
+  <span class="hljs-attr">width</span>: <span class="hljs-number">256</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">256</span>,
+  <span class="hljs-attr">depth</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">stencil</span>: <span class="hljs-literal">true</span>
 })
 </code></pre>
 <table>
@@ -2695,7 +2695,7 @@ cube.subimage(<span class="hljs-number">0</span>, [
 </tr>
 <tr>
 <td><code>'float'</code></td>
-<td>32 bit float</td>
+<td>32 bit float`</td>
 </tr>
 </tbody>
 </table>
@@ -2729,9 +2729,9 @@ cube.subimage(<span class="hljs-number">0</span>, [
 <h3 id="clear-the-draw-buffer">Clear the draw buffer</h3>
 <p><code>regl.clear</code> combines <code>gl.clearColor, gl.clearDepth, gl.clearStencil</code> and <code>gl.clear</code> into a single procedure, which has the following usage:</p>
 <pre><code class="lang-javascript">regl.clear({
-  color: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
-  depth: <span class="hljs-number">1</span>,
-  stencil: <span class="hljs-number">0</span>
+  <span class="hljs-attr">color</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>],
+  <span class="hljs-attr">depth</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">stencil</span>: <span class="hljs-number">0</span>
 })
 </code></pre>
 <table>
